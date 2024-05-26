@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+  <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+  <title>Home | InvoiceSync</title>
+</head>
+<body>
+  <nav th:replace="~{fragments/navbar-non-finance :: navbar-non-finance-staff(page='Home')}"></nav>
+  <!-- Modal -->
+  <div id="myModal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title theme-color">Complete Your Profile Now</h4>
+            </div>
+            <div class="modal-body">
+                <p class="theme-color" >First time on the system? Please <a th:href="@{/profile-page/edit}">complete your profile</a> first before using InvoiceSync.</p>
+            </div>
+        </div>
+    </div>
+  </div>
+  <div class="container">
+    <div class="row dashboard-row">
+      <div class="col dashboard-col p-3" style="background-image: linear-gradient(to right,#3f2685  , #856ad4);">
+          <div class="card-title text-left">
+            <h3 th:if="${showModal}" class="center-text theme-color"></h3>
+              <h4 th:unless="${showModal}" class="text-left text-white">Welcome to InvoiceSync, <span th:text="${employee.first_name} + ' ' + ${employee.last_name}"></span></h4>
+              <p class="text-left text-white">InvoiceSync is a web-based invoice management system made for a consulting firm that facilitates invoice creation, invoice approval, dashboards, and user management. As a non-finance staff, you have access to features to view the dashboard, create invoices, view the list of invoices and their details, assign approvers, and update your account profile.</p>
+          </div>
+      </div>
+  </div>
+  <div class="filter-container">
+        <label for="yearSelect">Select Year: </label>
+        <select id="yearSelect">
+        </select>
+    </div>
+  <div class="row dashboard-row">
+    <div class="col dashboard-col-left">
+        <div class="dashboard-content">
+            <h4 class="text-center mb-3">Your Latest Approved Invoices</h4>
+            <p class="text-center">This table represents 5 of your latest approved invoices.</p>
+            <div id="latest_invoice_table" style="height: 150px;"></div>
+        </div>
+    </div>
+    <div class="col dashboard-col">
+        <div class="dashboard-content">
+            <h4 class="text-center">Invoices You Need to Revise</h4>
+            <p class="text-center">This table represents 5 of your latest need revision invoices.</p>
+            <div id="latest_revision_table" style="height: 150px;"></div>
+        </div>
+    </div>
+    
+  </div>
+  <div class="row dashboard-row">
+    <div class="col dashboard-col">
+        <div class="dashboard-content">
+            <h4 class="text-center">Invoices Due Soon</h4>
+            <p class="text-center">This table represents 5 of your due soon invoices.</p>
+            <div id="due_invoice_table" style="height: 150px;"></div>
+        </div>
+    </div>
+    </div>
+  </div>
+
+  <script>
+    var showModal = "[[${showModal}]]";
+
+    if (showModal == "true") {
+        document.getElementById('myModal').style.display = 'block';
+    }
+  </script>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script>
+
+document.addEventListener('DOMContentLoaded', function () {
+        google.charts.load('current', {'packages':['table']});
+        fetchYears();
+    });
+
+    function fetchYears() {
+        fetch('/api/dashboard/years')
+            .then(response => response.json())
+            .then(years => {
+                const yearSelect = document.getElementById('yearSelect');
+                years.forEach(year => {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    yearSelect.appendChild(option);
+                });
+                drawTable()
+                setEventListeners();
+            })
+            .catch(error => console.error('Error loading years:', error));
+    }
+
+    function setEventListeners() {
+        document.getElementById('yearSelect').addEventListener('change', function() {
+            drawTable()
+        });
+    }
+
+    function drawTable() {
+        drawTableLatestApproved();
+        drawTableNeedRevision();
+        drawTableDue();
+    }
+
+    function drawTableLatestApproved() {
+        const selectedYear = document.getElementById('yearSelect').value;
+        const url = `/api/dashboard/latest-approved` + (selectedYear ? `?year=${selectedYear}` : '');
+
+        fetch(url, {cache : "no-store"})
+        .then(response => response.json())
+        .then(data => {
+            if(data.length === 0) {
+                document.getElementById('latest_invoice_table').innerHTML = '<div class="text-center">No data found in the system</div>';
+            }
+            else {
+                var dataTable = new google.visualization.DataTable();
+            dataTable.addColumn('string', 'Invoice Number');
+            dataTable.addColumn('string', 'Approved Date');
+            dataTable.addColumn('string', 'Customer');
+            dataTable.addColumn('string', 'Grand Total');
+
+            data.forEach(invoice => {
+                var formattedGrandTotal = formatCurrency(invoice.grandTotal);
+                dataTable.addRow([
+                    invoice.invoiceNumber,
+                    invoice.invoiceDate, 
+                    invoice.customerName, 
+                    formattedGrandTotal
+                ]);
+            });
+
+            var cssClassNames = {
+                'headerRow': 'header-row', 
+                'tableRow': 'table-row', 
+                'oddTableRow': 'odd-row', 
+                'headerCell': 'header-cell', 
+            };
+
+            var options = {
+                showRowNumber: true,
+                width: '100%',
+                height: 'auto',
+                cssClassNames: cssClassNames, 
+                allowHtml: true, 
+            };
+
+            var table = new google.visualization.Table(document.getElementById('latest_invoice_table'));
+            table.draw(dataTable, options);
+        }})
+        .catch(error => console.error('Error loading invoice data:', error));
+    }
+
+    function formatCurrency(amount) {
+        return 'Rp' + amount.toLocaleString('id-ID');
+    }
+
+    function drawTableNeedRevision() {
+        const selectedYear = document.getElementById('yearSelect').value;
+        const url = `/api/dashboard/latest-need-revision` + (selectedYear ? `?year=${selectedYear}` : '');
+
+        fetch(url, {cache : "no-store"})
+        .then(response => response.json())
+        .then(data => {
+            if (data.length === 0 ) {
+                document.getElementById('latest_revision_table').innerHTML = '<div class="text-center">No data found in the system</div>';
+            }
+            else {
+                var dataTable = new google.visualization.DataTable();
+                dataTable.addColumn('string', 'Invoice Number');
+                dataTable.addColumn('string', 'Invoice Date');
+                dataTable.addColumn('string', 'Customer');
+                dataTable.addColumn('string', 'Grand Total');
+
+                data.forEach(invoice => {
+                    var formattedGrandTotal = formatCurrency(invoice.grandTotal);
+                    dataTable.addRow([
+                        invoice.invoiceNumber,
+                        invoice.invoiceDate, 
+                        invoice.customerName, 
+                        formattedGrandTotal
+                    ]);
+                });
+
+                var cssClassNames = {
+                    'headerRow': 'header-row', 
+                    'tableRow': 'table-row', 
+                    'oddTableRow': 'odd-row', 
+                    'headerCell': 'header-cell', 
+                };
+
+                var options = {
+                    showRowNumber: true,
+                    width: '100%',
+                    height: 'auto',
+                    cssClassNames: cssClassNames, 
+                    allowHtml: true, 
+                };
+
+                var table = new google.visualization.Table(document.getElementById('latest_revision_table'));
+                table.draw(dataTable, options);
+            }})
+        .catch(error => console.error('Error loading invoice data:', error));
+    }
+
+    function drawTableDue() {
+        const selectedYear = document.getElementById('yearSelect').value;
+        const url = `/api/dashboard/due-by-email` + (selectedYear ? `?year=${selectedYear}` : '');
+
+        fetch(url, {cache : "no-store"})
+        .then(response => response.json())
+        .then(data => {
+            if (data.length === 0 ) {
+                document.getElementById('due_invoice_table').innerHTML = '<div class="text-center">No data found in the system</div>';
+            }
+            else {
+                var dataTable = new google.visualization.DataTable();
+                dataTable.addColumn('string', 'Invoice Number');
+                dataTable.addColumn('string', 'Due Date');
+                dataTable.addColumn('string', 'Customer');
+                dataTable.addColumn('string', 'Grand Total');
+
+                data.forEach(invoice => {
+                    var formattedGrandTotal = formatCurrency(invoice.grandTotal);
+                    dataTable.addRow([
+                        invoice.invoiceNumber,
+                        invoice.invoiceDate, 
+                        invoice.customerName, 
+                        formattedGrandTotal
+                    ]);
+                });
+
+                var cssClassNames = {
+                    'headerRow': 'header-row', 
+                    'tableRow': 'table-row', 
+                    'oddTableRow': 'odd-row', 
+                    'headerCell': 'header-cell', 
+                };
+
+                var options = {
+                    showRowNumber: true,
+                    width: '100%',
+                    height: 'auto',
+                    cssClassNames: cssClassNames, 
+                    allowHtml: true, 
+                };
+
+                var table = new google.visualization.Table(document.getElementById('due_invoice_table'));
+                table.draw(dataTable, options);
+            }})
+        .catch(error => console.error('Error loading invoice data:', error));
+    }
+  </script>
+
+</body>
+</html>

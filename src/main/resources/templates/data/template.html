@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Invoice</title>
+    <style>
+        .invoice {
+            width: 100%;
+            padding: 7px;
+        }
+        .flex-table {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .flex-column {
+            flex: 1;
+        }
+        .invoice-status {
+            display: inline-block;
+            padding: 3px 10px;
+            text-transform: uppercase;
+            float: right;
+            border: 1px solid
+            border-color: grey;
+        }
+        .invoice-header h1 {
+            color: #3F2685;
+            margin-bottom: 0px;
+        }
+        .invoice-header h2 {
+            font-size: 24px;
+            margin-top: 5px;
+        }
+        .invoice-date{
+            text-align: right;
+        }
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .invoice-table th,
+        .invoice-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+        }
+        .invoice-table th {
+            background-color: #f2f2f2;
+            text-align: center;
+        }
+        .invoice-table td {
+            text-align: right;
+        }
+        .invoice-total {
+            text-align: right;
+        }
+        .invoice-signature{
+            text-align: right;
+        }
+        .invoice-logo-brand {
+            max-width: 100px;
+            width: 100%;
+            object-fit: fill;
+        }
+        .invoice-body .flex-table {
+            display: flex;
+        }
+        .invoice-body .flex-column {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .invoice-body .table-subtotal {
+            border-collapse: collapse;
+            box-sizing: border-box;
+            width: 100%;
+            margin-top: 2vh;
+        }
+        .table-subtotal tbody tr td {
+            border-bottom: 1px solid #dcdcdc;
+            text-align: left;
+            padding: 1vh;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice">
+        <div class="flex-table">
+            <p th:text="${logo}"></p>
+            <div class="flex-column">
+                <div class="invoice-header">
+                    <h1>INVOICE</h1>
+                    <h2 th:text="${invoiceNumber}"></h2>
+                </div>
+            </div>
+            <div class="flex-column">
+                <div class="invoice-status" th:if="${status == 'Paid'}">
+                    <p th:text="${status}"></p>
+                </div>
+            </div>
+        </div>        
+  <div class="invoice-date">
+   <p th:text="'Invoice Date: '+ ${invoiceDate}"></p>
+   <p th:text="'Due Date: '+ ${dueDate}"></p>
+  </div>
+        <div class="invoice-body">
+        <p><b>Customer Information</b></p>
+        <p th:text="${customer}"></p>
+        <p th:text="'Name: ' + ${customerName}"></p>
+        <p th:text="'Address: '+ ${customerAddress}"></p>
+        <p th:text="'Contact: '+ ${customerContact}"></p>
+        <p th:text="'Telp: ' + ${customerPhone}"></p>
+        <table class="invoice-table">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Description</th>
+                    <th>Quantity</th>
+                    <th>Price/Qty</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="product, iterationStatus: ${listProduct}">
+                    <td th:text="${iterationStatus.count}">#</td>
+                    <td th:text="${product.description}"></td>
+                    <td th:text="${product.quantity}"></td>
+                    <td th:text="${product.price}"></td>
+                    <td th:text="${product.totalPrice}"></td>
+                </tr>
+            </tbody>
+        </table>
+        <br>
+        <div class="flex-table">
+            <div class="flex-column"></div>
+            <div class="flex-column">
+                <table class="table-subtotal">
+                    <tbody>
+                    <tr>
+                        <td>Subtotal</td>
+                        <td th:text="${subtotal}"></td>
+                    </tr>
+                    <tr>
+                        <td>Discount (%)</td>
+                        <td th:text="${totalDiscount}"></td>
+                    </tr>
+                    <tr>
+                        <td>Tax Amount</td>
+                        <td th:text="${taxes}"></td>
+                    </tr>
+                    <tr>
+                        <td>Grand Total</td>
+                        <td th:text="${grandTotal}"></td>
+                    </tr>
+                    <tr>
+                        <td>Total Amount</td>
+                        <td th:text="${totalWords}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <p><b>Payment Information</b></p>
+    <p th:text="${bankName} + ' ' + ${accountNumber} + ' a/n ' + ${accountName}"></p>
+    <p><b>Additional Document</b></p>
+    <div class="additional-document">
+        <span th:if="${#lists.isEmpty(documents)}">
+            <p>No additional documents were attached.</p>
+        </span>
+        <span th:each="file : ${documents}" th:if="${!#lists.isEmpty(documents)}">
+            <i class="fa fa-file fa-lg" aria-hidden="true"></i>
+            <a th:href="${file.fileUrl}" th:text="${file.fileName}" class="mb-2"></a>
+        </span>
+    </div>
+    <div class="invoice-signature">
+        <p th:text="${city} + ', ' + ${invoiceDate}"></p>
+        <img th:src="${signature}" alt="" style="max-height: fit-content; max-width: 300px;" />
+        <p text-align="center" th:text="'Created by: ' + ${employeeName}"></p>
+    </div>
+</div>
+</body>
+</html>

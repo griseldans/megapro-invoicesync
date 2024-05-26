@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+  <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>Home | InvoiceSync</title>
+</head>
+<body>
+    <nav th:replace="~{fragments/navbar-finance :: navbar-finance-exc(page='Home')}"></nav>
+    <!-- Modal -->
+    <div id="myModal" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title theme-color">Complete Your Profile Now</h4>
+                </div>
+                <div class="modal-body">
+                    <p class="theme-color" >First time on the system? Please <a th:href="@{/profile-page/edit}">complete your profile</a> first before using InvoiceSync.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row dashboard-row">
+            <div class="col dashboard-col p-3" style="background-image: linear-gradient(to right,#3f2685  , #856ad4);">
+                <div class="card-title text-left">
+                    <h3 th:if="${showModal}" class="center-text theme-color"></h3>
+                    <h4 th:unless="${showModal}" class="text-left text-white">Welcome to InvoiceSync, <span th:text="${employee.first_name} + ' ' + ${employee.last_name}"></span></h4>
+                    <p class="text-left text-white">InvoiceSync is a web-based invoice management system made for a consulting firm that facilitates invoice creation, invoice approval, dashboards, and user management. As a finance director, you have access to features to view the dashboard, approve invoices, view the list of invoices and their details, and update your account profile.</p>
+                </div>
+            </div>
+        </div>
+        <div class="filter-container">
+            <label for="yearSelect">Select Year: </label>
+            <select id="yearSelect">
+            </select>
+        </div>
+        <div class="row dashboard-row">
+            <div class="col dashboard-col">
+                <div class="dashboard-content">
+                    <h4 class="text-center">Total Paid Amount</h4>
+                    <p class="text-center">This figure represents the paid amount of invoices issued this year.</p>
+                    <h5 id="formattedPaidAmount" class="theme-color text-center"></h5>
+                </div>
+            </div>
+            <div class="col dashboard-col-middle">
+                <div class="dashboard-content">
+                    <h4 class="text-center">Total Unpaid Amount</h4>
+                    <p class="text-center">This figure represents the unpaid amount of invoices issued this year.</p>
+                    <h5 id="formattedUnpaidAmount" class="theme-color text-center"></h5>
+                </div>
+            </div>
+            <div class="col dashboard-col">
+                <div class="dashboard-content">
+                    <h4 class="text-center">Total Overdue Amount</h4>
+                    <p class="text-center">This figure represents the overdue amount of invoices issued this year.</p>
+                    <h5 id="formattedOverdueAmount" class="theme-color text-center"></h5>
+                </div>
+            </div>
+        </div>
+        <div class="row dashboard-row">
+            <div class="col dashboard-col">
+                <div class="dashboard-content">
+                    <h4 class="text-center">Monthly Net Revenue</h4>
+                    <p class="text-center">This figure represents the amount of net revenue (revenue - tax) from the invoices that are paid this year.</p>
+                    <div id="line_chart"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row dashboard-row">
+            <div class="col dashboard-col">
+                <div class="dashboard-content">
+                    <h4 class="text-center">Top 5 Customers by Invoice</h4>
+                    <p class="text-center">This figure shows the top 5 customers with the highest number of invoices issued this year.</p>
+                    <div id="customerPieChart" style="height: 250px;"></div>
+                </div>
+            </div>
+            <div class="col dashboard-col-middle">
+                <div class="dashboard-content">
+                    <h4 class="text-center">Top 5 Products by Invoice</h4>
+                    <p class="text-center">This figure shows the top 5 most ordered products this year.</p>
+                    <div id="productPieChart" style="height: 250px;"></div>
+                </div>
+            </div>
+            <div class="col dashboard-col">
+                <div class="dashboard-content">
+                    <h4 class="text-center">Invoice Payment Status Ratio</h4>
+                    <p class="text-center">This figure shows the ratio of Paid and Unpaid invoices issued this year.</p>
+                    <div id="invoiceStatusPieChart" style="height: 250px;"></div>
+                </div>
+            </div>
+        </div>
+        
+        </div>
+    </div>
+
+  <!-- JavaScript code to handle modal display -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.9.3/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+  <script>
+    var showModal = "[[${showModal}]]";
+    if (showModal == "true") {
+        document.getElementById('myModal').style.display = 'block';
+    }
+  </script>
+
+<script type="text/javascript">
+    google.charts.load('current', {
+        'packages':['corechart', 'line']
+    });    
+
+    document.addEventListener('DOMContentLoaded', function() {
+        fetchYears();
+    });
+
+    function drawCharts() {
+        drawRevenueChart();
+        drawCustomerChart();
+        drawProductChart();
+        drawStatusChart();
+    }
+
+    function fetchYears() {
+        fetch('/api/dashboard/years')
+            .then(response => response.json())
+            .then(years => {
+                const yearSelect = document.getElementById('yearSelect');
+                years.forEach(year => {
+                    const option = document.createElement('option');
+                    option.value = year;
+                    option.textContent = year;
+                    yearSelect.appendChild(option);
+                });
+                fetchPaidAmount();
+                fetchUnpaidAmount();
+                fetchOverdueAmount();
+                drawCharts();
+                setEventListeners();
+            })
+            .catch(error => console.error('Error loading years:', error));
+    }
+
+    function setEventListeners() {
+        document.getElementById('yearSelect').addEventListener('change', function() {
+            fetchPaidAmount(); 
+            fetchUnpaidAmount();
+            fetchOverdueAmount();
+            drawCharts();
+        });
+    }
+
+    function fetchPaidAmount() {
+        const selectedYear = document.getElementById('yearSelect').value;
+        const url = `/api/dashboard/paid-amount` + (selectedYear ? `?year=${selectedYear}` : '');
+
+        fetch(url, { cache: "no-store" })
+            .then(response => response.json())
+            .then(data => {
+                const formattedPaidAmount = document.getElementById('formattedPaidAmount');
+                formattedPaidAmount.textContent = formatAmount(data);
+            })
+            .catch(error => {
+                console.error('Failed to fetch paid amount', error);
+                document.getElementById('formattedPaidAmount').textContent = 'Rp0,00';
+            });
+    }
+
+    function fetchUnpaidAmount() {
+        const selectedYear = document.getElementById('yearSelect').value;
+        const url = `/api/dashboard/unpaid-amount` + (selectedYear ? `?year=${selectedYear}` : '');
+
+        fetch(url, { cache: "no-store" })
+            .then(response => response.json())
+            .then(data => {
+                const formattedUnpaidAmount = document.getElementById('formattedUnpaidAmount');
+                formattedUnpaidAmount.textContent = formatAmount(data);
+            })
+            .catch(error => {
+                console.error('Failed to fetch unpaid amount', error);
+                document.getElementById('formattedUnpaidAmount').textContent = 'Rp0,00';
+            });
+    }
+
+    function fetchOverdueAmount() {
+        const selectedYear = document.getElementById('yearSelect').value;
+        const url = `/api/dashboard/overdue-amount` + (selectedYear ? `?year=${selectedYear}` : '');
+
+        fetch(url, { cache: "no-store" })
+            .then(response => response.json())
+            .then(data => {
+                const formattedOverdueAmount = document.getElementById('formattedOverdueAmount');
+                formattedOverdueAmount.textContent = formatAmount(data);
+            })
+            .catch(error => {
+                console.error('Failed to fetch overdue amount', error);
+                document.getElementById('formattedOverdueAmount').textContent = 'Rp0,00';
+            });
+    }
+
+    function drawRevenueChart() {
+        const selectedYear = document.getElementById('yearSelect').value;
+        const url = `/api/dashboard/revenue` + (selectedYear ? `?year=${selectedYear}` : '');
+        
+        fetch(url, { cache: "no-store" })
+            .then(response => response.json())
+            .then(data => {
+                const dataTable = new google.visualization.DataTable();
+                dataTable.addColumn('string', 'Month');
+                dataTable.addColumn('number', 'Revenue');
+                
+                if (data.length === 0) {
+                    dataTable.addRow(['No Data', 0]);
+                } else {
+                    data.forEach(item => {
+                        dataTable.addRow([item.month, parseFloat(item.revenue)]);
+                    });
+                }
+
+                var options = {
+                    hAxis: {
+                        title: 'Month',
+                        textStyle: {
+                            color: '#3f2685',
+                            fontSize: 14,
+                        },
+                        titleTextStyle: {
+                            color: '#3f2685',
+                            fontSize: 16,
+                            bold: true,
+                        }
+                    },
+                    vAxis: {
+                        title: 'Revenue',
+                        minValue: 0 ,
+                        format: '#',
+                        textStyle: {
+                            color: '#3f2685',
+                            fontSize: 14,
+                        },
+                        titleTextStyle: {
+                            color: '#3f2685',
+                            fontSize: 16,
+                            bold: true,
+                        }
+                    },
+                    legend: 'none',
+                    pointSize: 5,
+                    curveType: 'function',
+                    height: 500,
+                    chartArea: {width: '60%', height: '75%'},
+                    colors: ['#3f2685'],
+                };
+
+                var chart = new google.visualization.LineChart(document.getElementById('line_chart'));
+                chart.draw(dataTable, options);
+            })
+            .catch(error => console.error('Error loading the revenue data:', error));
+    }
+
+    function drawCustomerChart() {
+        const selectedYear = document.getElementById('yearSelect').value;
+        const url = `/api/dashboard/top-customers` + (selectedYear ? `?year=${selectedYear}` : '');
+
+        fetch(url, { cache: "no-store" })
+            .then(response => response.json())
+            .then(topCustomers => {
+                console.log(topCustomers)
+                if (topCustomers.length === 0) {
+                    document.getElementById('customerPieChart').innerHTML = '<div class="text-center">No data found in the system</div>';
+                } else {
+                    var data = new google.visualization.DataTable();
+                    data.addColumn('string', 'Customer');
+                    data.addColumn('number', 'Total Invoiced');
+                    
+                    topCustomers.forEach(customer => {
+                        data.addRow([customer.customerName, customer.invoiceCount]);
+                    });
+
+                    var options = {
+                        pieHole: 0.4,
+                        height: 250,
+                        colors: ['#3f2685', '#a0153e', '#45a5f5', '#ff8f00', '#4caf50'],
+                        pieSliceTextStyle: {
+                            fontSize: 9,
+                            italic: true 
+                        }
+                    };
+
+                    var chart = new google.visualization.PieChart(document.getElementById('customerPieChart'));
+                    chart.draw(data, options);
+                }
+            })
+            .catch(error => console.error('Error fetching top customers data:', error));
+    }
+
+    function drawProductChart() {
+        const selectedYear = document.getElementById('yearSelect').value;
+        const url = `/api/dashboard/top-products` + (selectedYear ? `?year=${selectedYear}` : '');
+
+        fetch(url, { cache : "no-store" })
+            .then(response => response.json())
+            .then(topProducts => {
+                if (topProducts.length === 0) {
+                    document.getElementById('productPieChart').innerHTML = '<div class="text-center">No data found in the system</div>';
+                } else {
+                    var data = new google.visualization.DataTable();
+                    data.addColumn('string', 'Products');
+                    data.addColumn('number', 'Total Invoiced');
+
+                    topProducts.forEach(product => {
+                        data.addRow([product.productName, product.invoiceCount]);
+                    });
+
+                    var options = {
+                        pieHole: 0.4,
+                        height: 250,
+                        colors: ['#3f2685', '#a0153e', '#45a5f5', '#ff8f00', '#4caf50'],
+                        pieSliceTextStyle: {
+                            fontSize: 9,
+                            italic: true 
+                        }
+                    };
+
+                    var chart = new google.visualization.PieChart(document.getElementById('productPieChart'));
+                    chart.draw(data, options);
+                }
+            })
+            .catch(error => console.error('Error fetching top customers data:', error));
+    }
+
+    function drawStatusChart() {
+        const selectedYear = document.getElementById('yearSelect').value;
+        const url = `/api/dashboard/invoice-ratio` + (selectedYear ? `?year=${selectedYear}` : '');
+
+        fetch(url, { cache : "no-store"} )
+            .then(response => response.json())
+            .then(invoiceStatus => {
+                if (invoiceStatus.length === 0) {
+                    document.getElementById('invoiceStatusPieChart').innerHTML = '<div class="text-center">No data found in the system</div>';
+                } else {
+                    var data = new google.visualization.DataTable();
+                    data.addColumn('string', 'Status');
+                    data.addColumn('number', 'Total Invoice Count');
+
+                    invoiceStatus.forEach(invoice => {
+                        data.addRow([invoice.status, invoice.count]);
+                    });
+
+                    var options = {
+                        pieHole: 0.4,
+                        height: 250,
+                        colors: ['#3f2685', '#a0153e', '#45a5f5', '#ff8f00', '#4caf50'],
+                        pieSliceTextStyle: {
+                            fontSize: 9,
+                            italic: true 
+                        }
+                    };
+
+                    var chart = new google.visualization.PieChart(document.getElementById('invoiceStatusPieChart'));
+                    chart.draw(data, options);
+                }
+            })
+            .catch(error => console.error('Error fetching top customers data:', error));
+    }
+
+    function formatAmount(value) {
+        if (isNaN(value)) {
+            return 'Rp0,00';
+        }
+        const formatter = new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 2
+        });
+        return formatter.format(value);
+    }
+</script>
+
+</body>
+</html>

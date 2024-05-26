@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+    <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+</head>
+<body>
+<nav th:fragment="navbar-login" class="navbar navbar-expand-lg navbar-bg  p-3">
+    <a class="navbar-brand" th:href="@{/}">
+        <img th:src="@{/assets/nav-logo.png}" alt="INVOICESYNC Logo" style="width: 240px;" />
+    </a>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+          <ul class="navbar-nav">
+              <li class="nav-item">
+                  <a class="nav-link" href="#">Have trouble signing in? Contact our admin now!</a>
+              </li>
+          </ul>
+      </div>
+  </nav>
+</body>

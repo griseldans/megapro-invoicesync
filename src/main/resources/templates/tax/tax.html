@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tax | InvoiceSync</title>
+  <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+  <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+</head>
+  <body>
+    <nav th:replace="~{fragments/navbar-finance :: navbar-finance-staff(page='Tax')}"></nav>
+    <div class="container">
+      <div class="card-title">
+        <h2>Tax Management</h2>
+        
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <p>Add a tax option by clicking the 'Add' button.</p>
+          <div class="row g-3">
+            <div class="col-auto">
+              <button type="button" class="btn btn-primary" style="padding-left: 0.5rem; padding-right: 0.5rem;" data-toggle="modal" data-target="#exampleModal">Add</button>
+            </div>
+          </div>
+          <div class="nav-link">
+            <table class="table table-custom" style="width: 75%;">
+              <thead>
+                <tr>
+                  <th scope="col">Tax Name</th>
+                  <th scope="col">Percentage</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Iterate over taxes and populate table rows -->
+                <tr th:if="${#lists.size(taxes) == 0}">
+                  <td colspan="6" class="text-center">There are no saved tax records.</td>
+                </tr>     
+                <tr th:each="tax : ${taxes}">
+                  <td th:text="${tax.taxName}"></td>
+                  <td th:text="${tax.taxPercentage}"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  <!-- Modal -->
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Add New Tax</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <!-- Form for Inputs -->
+          <form th:action="@{/create-tax}" th:object="${taxDTO}" method="POST">
+            <div class="form-group">
+              <label for="namaPajak">Tax Name</label>
+              <input required type="text" th:field="*{taxName}" class="form-control" id="namaPajak" placeholder="Enter tax name"/>
+            </div>
+            <div class="form-group">
+              <label for="persentase">Percentage</label>
+              <input required type="number" th:field="*{taxPercentage}" class="form-control" id="persentase" placeholder="Enter percentage"/>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Add</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

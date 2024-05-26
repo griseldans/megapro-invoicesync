@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8" />
+  <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+  <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+  <title>Create Invoice | InvoiceSync</title>
+</head>
+
+<body>
+    <nav th:replace="~{fragments/navbar-non-finance :: navbar-non-finance-staff(page = 'Create-Invoice')}"></nav>
+    <div class="container">
+    <div class="card-title">
+        <h2>Create Invoice</h2>
+    </div>
+    <form th:action="@{/create-invoice}" th:object="${invoiceDTO}" method="POST" enctype="multipart/form-data">
+    <span th:text="${invoiceDummyId}" id="invoiceDummyId" hidden></span>
+    <a class="btn btn-danger" href="/home">Cancel</a> 
+    <button class="btn btn-primary" type="submit">Save</button>
+    <div class="grid-container-invoice-logs">
+        <div class="grid-container-invoice-logs-child">
+            <div class="card">
+                <div class="card-body">
+                <div class="container-title">
+                    <div class="row">
+                        <div class="col" style="text-align:left;">
+                            <h3>Draft</h3>
+                        </div>
+                        <div class="col" style="text-align:right;" th:include="~{fragments/invoice-status :: invoice-status-show}"></div>
+                    </div>
+                </div>
+                <hr>
+                <div class="content">
+                    <div class="justify-content-center">
+                        <div class="row" style="align-items:center;">
+                            <div class="col">
+                                <button type="button" class="btn btn-primary mb-3" data-toggle="modal" data-target="#addCustomerModal">New Customer</button>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><p class="card-text">Customer</p></td>
+                                        <td>
+                                            <select class="form-control" th:field="*{customerId}" id="customerName" onchange="updateCustomerContact()" >
+                                                <option value="">Choose customer</option>
+                                                <option th:each="customer : ${listCustomer}" 
+                                                        th:value="${customer.customerId}" 
+                                                        th:text="${customer.name}"
+                                                        th:data-contact="${customer.contact}" 
+                                                        th:data-address="${customer.address}" ></option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><p class="card-text">Contact</p></td>
+                                        <td><input class="form-control" type="text" th:text="${customerContact}" id="customerContact" readonly /></td>
+                                    </tr>
+                                    <tr>
+                                        <td><p class="card-text">Address</p></td>
+                                        <td><input class="form-control" type="text" th:text="${customerAddress}" id="customerAddress" readonly /></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><p class="card-text">Invoice Date</p></td>
+                                        <td><input class="form-control" th:value="${date}" readonly /></td>
+                                    </tr>
+                                    <tr>
+                                        <td><p class="card-text">Due Date</p></td>
+                                        <td><input class="form-control" type="date" th:field="*{dueDate}"/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        <p class="card-info">Please attach document or input the fields below to add product list.</p>
+                        <br>
+
+                        <p class="card-text">Product List (.xlsx)</p>
+                        <p>Please refer to <a id="openGuidelinesModal" href="#" onclick="showGuidelinesModal()">these guidelines</a> for the document's format.</p>
+                        <input type="file" class="form-control" id="productDocument" name="productDocument"/>
+                        <br>
+
+                        <button id="addRowInvoice" class="btn btn-primary mb-3" type="button">Add Row</button>
+                        <table class="table table-bordered">
+                            <thead class="bg-dark text-white">
+                                <tr>
+                                    <th>No</th>
+                                    <th>Description</th>
+                                    <th>Quantity</th>
+                                    <th>Price/Qty</th>
+                                    <th>Total Price</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead> 
+                            <tbody id="invoiceTableBody">
+                            </tbody>
+                        </table>
+                        <p class="card-info">Please click the check button if the product details are correct.</p>
+
+                        <hr>
+
+                        <div class="row">
+                            <div class="col">
+                                <div class="mb-4">
+                                    <p class="card-text">Payment Information</p>
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td><p class="card-text">Bank Name</p></td>
+                                            <td><input class="form-control" type="text" th:field="*{bankName}" placeholder="Bank Name" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td><p class="card-text">Account Number</p></td>
+                                            <td><input class="form-control" type="text" th:field="*{accountNumber}" placeholder="Account Number"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><p class="card-text">Account Name</p></td>
+                                            <td><input class="form-control" type="text" th:field="*{accountName}" placeholder="Account Name"/></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="col">
+                                <div class="mb-4">
+                                <table class="table table-bordered-classic">
+                                        <tr>
+                                            <td><p class="card-text">Subtotal</p></td>
+                                            <td>
+                                                <input name="subtotalInvoice" class="form-control" type="number" th:field="*{subtotal}" readonly />
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><p class="card-text">Discount (%)</p></td>
+                                            <td><input name="totalDiscount" class="form-control" type="number" th:field="*{totalDiscount}" oninput="calculateGrandTotal()"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><p class="card-text">Tax</p></td>
+                                            <td>
+                                                <div id="taxList">
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><p class="card-text">Tax Amount</p></td>
+                                            <td>
+                                                <input class="form-control" th:field="*{taxTotal}" type="number" disabled />
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><p class="card-text">Grand Total</p></td>
+                                            <td>
+                                                <input name="grandTotal" class="form-control" th:field="*{grandTotal}" type="number"  readonly />
+        
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><p class="card-text">Amount in Words</p></td>
+                                            <td>
+                                                <textarea class="form-control" th:field="*{totalWords}" style="resize: vertical;"></textarea>
+                                            </td>
+                                        </tr> 
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+
+                        <div class="row">
+                            <div class="col">
+                                <div class="mb-4">
+                                    <p class="card-info">Please attach additional documents for approval.</p>
+                                    <br>
+                                    <div class="mb-3">
+                                        <p for="files" class="card-text">Additional Documents</p>
+                                        <input class="form-control" type="file" id="files" name="files" multiple>
+                                    </div>
+                                    <!-- <p class="card-text">Additional Document</p>
+                                    <input type="file" class="form-control" name="file"/>
+                                    <input type="hidden" th:field="*{additionalDocument}" /> -->
+                                </div>
+                            </div>
+
+                            <div class="col">
+                                <div class="mb-4">
+                                    <p class="card-text">Signature</p>
+                                    <div class="form-inline">
+                                        <div class="form-group mr-2">
+                                            <input class="form-control" type="text" th:field="*{city}" placeholder="City" />
+                                        </div>
+                                        <div class="form-group">
+                                            <p class="card-text" th:text="', '+${dateInvoice}"></p>
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <div class="drag-area">
+                                        <input type="file" id="base64String" name="base64String" accept="image/*">
+                                        <input th:field="*{signature}" hidden/>
+                                    </div>
+                                    <br>
+                                    <input class="form-control" type="text" th:field="*{staffEmail}" hidden />
+                                    <p class="card-text" th:text="'Created by: ' + ${employee.first_name} + ' ' + ${employee.last_name}"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </form>
+        <div class="grid-container-invoice-logs-child">
+            <div class="container-logs">
+                <div class="container title" style="text-align: center; margin-bottom: 0;">
+                    <h3>Approval Log</h3>
+                </div>
+                <hr>
+            </div>
+        </div>  
+    </div>
+    </div>
+    <div class="modal fade" id="addCustomerModal" tabindex="-1" role="dialog" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCustomerModalLabel">Add New Customer</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form th:action="@{/create-customer}" th:object="${customerDTO}" method="post">
+                        <div class="form-group">
+                            <label for="customerName">Name</label>
+                            <input class="form-control" type="text" th:field="*{name}" required/>
+                            <label for="customerContact">Contact</label>
+                            <input class="form-control" type="text" th:field="*{contact}" required/>
+                            <label for="customerPhone">Phone</label>
+                            <input class="form-control" type="text" th:field="*{phone}" required/>
+                            <label for="customerAddress">Address</label>
+                            <textarea class="form-control" type="text" th:field="*{address}" style="height:100px" required/>
+                        </div>
+                    </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal untuk Pesan Sukses -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel">Success</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" id="closeModalButton">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="successMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal untuk Pesan Error -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel">Error</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close" id="closeModalButton">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="errorMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+ 
+    <div class="modal fade" id="guidelinesModal" role="dialog" data-toggle="modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="guidelinesModalTitle">Document Guidelines</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" onclick="hideGuidelinesModal()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>1. The document file format must be <b>.xlsx</b> for better accuracy.</p>
+                    <p>2. The product list must be in the <b>first sheet</b> of the document.</p>
+                    <p>3. The document must include a minimum of three cells titled <b>"description", "quantity", and "price" in lowercase format</b> with specific styles for each column as below:</p>
+                    <p>a) Description column will contain the product's description.</p>
+                    <p>b) Quantity column will contain the product's quantity. Make sure it only contains number.</p>
+                    <p>c) Price column will contain product's price. Make sure it only contains number (without any currency sign or punctuation).</p>
+                    <p>4. Please review the product details after uploading the file to ensure the accuracy and correctness of the data.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="hideGuidelinesModal()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="errorReadProductList" role="dialog" data-toggle="modal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="guidelinesModalTitle">Error</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" onclick="hideErrorReadProductList()" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Error while reading the product data from the document. Please make sure the document's content follows the guidelines.</p> 
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="hideErrorReadProductList()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/scripts/modal.js"></script>
+    <script src="/js/scripts/create-invoice.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#openGuidelinesModal').click(function() {
+                $('#approverModal').modal('show');
+            });
+        });
+    </script>    
+    <script th:inline="javascript">
+        $(document).ready(function() {
+            var successMessage = /*[[${successMessage}]]*/ null;
+            var errorMessage = /*[[${errorMessage}]]*/ null;
+        
+            if (successMessage && successMessage !== '') {
+                $("#successMessage").text(successMessage);
+                $("#successModal").modal('show');
+            } else if (errorMessage && errorMessage !== '') {
+                $("#errorMessage").text(errorMessage);
+                $("#errorModal").modal('show');
+            }
+        });
+        
+        var closeModalButton = document.getElementById('closeModalButton');
+        if (closeModalButton) {
+            closeModalButton.addEventListener('click', function() {
+                $('#errorModal').modal('hide');
+                $('#successModal').modal('hide');
+            });
+        }        
+    </script>
+</body>
+</html>

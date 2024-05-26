@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+  <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <title>Home | InvoiceSync</title>
+</head>
+<body>
+    <nav th:replace="~{fragments/navbar-finance :: navbar-finance-exc(page='Home')}"></nav>
+    <!-- Modal -->
+    <div id="myModal" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title theme-color">Complete Your Profile Now</h4>
+                </div>
+                <div class="modal-body">
+                    <p class="theme-color" >First time on the system? Please <a th:href="@{/profile-page/edit}">complete your profile</a> first before using InvoiceSync.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row dashboard-row">
+            <div class="col dashboard-col" style="background-image: linear-gradient(to right,#3f2685  , #856ad4);">
+                <div class="card-title text-left">
+                    <h3 th:if="${showModal}" class="center-text theme-color"></h3>
+                    <h4 th:unless="${showModal}" class="text-left text-white">Welcome to InvoiceSync, <span th:text="${employee.first_name} + ' ' + ${employee.last_name}"></span></h4>
+                    <p class="text-left text-white">InvoiceSync is a web-based invoice management system made for a consulting firm that facilitates invoice creation, invoice approval, dashboards, and user management. As a finance manager, you have access to features to view the dashboard, approve invoices, view the list of invoices and their details, and update your account profile.</p>
+                </div>
+            </div>
+        </div>
+        <div class="filter-container">
+            <label for="yearSelect">Select Year: </label>
+            <select id="yearSelect">
+            </select>
+        </div>
+        <div class="row dashboard-row">
+            <div class="col dashboard-col">
+                <div class="dashboard-content">
+                    <h4 class="text-center">Total Paid Amount</h4>
+                    <p class="text-center">This figure represents the paid amount of invoices issued this year.</p>
+                    <h5 id="formattedPaidAmount" class="theme-color text-center"></h5>
+                </div>
+            </div>
+            <div class="col dashboard-col-middle">
+                <div class="dashboard-content">
+                    <h4 class="text-center">Total Unpaid Amount</h4>
+                    <p class="text-center">This figure represents the unpaid amount of invoices issued this year.</p>
+                    <h5 id="formattedUnpaidAmount" class="theme-color text-center"></h5>
+                </div>
+            </div>
+            <div class="col dashboard-col">
+                <div class="dashboard-content">
+                    <h4 class="text-center">Total Overdue Amount</h4>
+                    <p class="text-center">This figure represents the overdue amount of invoices issued this year.</p>
+                    <h5 id="formattedOverdueAmount" class="theme-color text-center"></h5>
+                </div>
+            </div>
+        </div>
+        <div class="row dashboard-row">
+            <div class="col dashboard-col">
+                <div class="dashboard-content">
+                    <h4 class="text-center">Number of Invoices per Month</h4>
+                    <p class="text-center">This figure represents the number of invoice issued each month of this year.</p>
+                    <div id="chart_invoice" style="width: 100%; height: 500px;"></div>
+                </div>
+            </div>
+            <div class="col dashboard-col-middle">
+                <div class="dashboard-content">
+                    <h4 class="text-center">Total Tax Gain</h4>
+                    <p class="text-center">This figure represents the amount of taxes gained from paid invoices each month of this year.</p>
+                    <div id="chart_tax" style="width: 100%; height: 500px;"></div>
+                </div>
+            </div>
+            <div class="col dashboard-col">
+                <div class="dashboard-content">
+                    <h4 class="text-center">Number of Invoices by Payment Status</h4>
+                    <p class="text-center">This figure represents the number of paid and unpaid invoices each month of this year.</p>
+                    <div id="chart_status" style="width: 100%; height: 500px;"></div> 
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+  <!-- JavaScript code -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.9.3/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+  <script>
+    var showModal = "[[${showModal}]]";
+    if (showModal == "true") {
+        document.getElementById('myModal').style.display = 'block';
+    }
+  </script>
+
+    <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchYears();
+        });
+
+        function drawCharts() {
+            drawChartNumber();
+            drawChartStatus();
+            drawChartTax();
+        }
+
+        function fetchYears() {
+            fetch('/api/dashboard/years')
+                .then(response => response.json())
+                .then(years => {
+                    const yearSelect = document.getElementById('yearSelect');
+                    years.forEach(year => {
+                        const option = document.createElement('option');
+                        option.value = year;
+                        option.textContent = year;
+                        yearSelect.appendChild(option);
+                    });
+                    fetchPaidAmount();
+                    fetchUnpaidAmount();
+                    fetchOverdueAmount();
+                    drawCharts();
+                    setEventListeners();
+                })
+                .catch(error => console.error('Error loading years:', error));
+        }
+
+        function setEventListeners() {
+            document.getElementById('yearSelect').addEventListener('change', function() {
+                fetchPaidAmount(); 
+                fetchUnpaidAmount();
+                fetchOverdueAmount();
+                drawCharts();
+            });
+        }
+
+        function fetchPaidAmount() {
+            const selectedYear = document.getElementById('yearSelect').value;
+            const url = `/api/dashboard/paid-amount` + (selectedYear ? `?year=${selectedYear}` : '');
+
+            fetch(url, { cache: "no-store" })
+                .then(response => response.json())
+                .then(data => {
+                    const formattedPaidAmount = document.getElementById('formattedPaidAmount');
+                    formattedPaidAmount.textContent = formatAmount(data);
+                })
+                .catch(error => {
+                    console.error('Failed to fetch paid amount', error);
+                    document.getElementById('formattedPaidAmount').textContent = 'Rp0,00';
+                });
+        }
+
+        function fetchUnpaidAmount() {
+            const selectedYear = document.getElementById('yearSelect').value;
+            const url = `/api/dashboard/unpaid-amount` + (selectedYear ? `?year=${selectedYear}` : '');
+
+            fetch(url, { cache: "no-store" })
+                .then(response => response.json())
+                .then(data => {
+                    const formattedUnpaidAmount = document.getElementById('formattedUnpaidAmount');
+                    formattedUnpaidAmount.textContent = formatAmount(data);
+                })
+                .catch(error => {
+                    console.error('Failed to fetch unpaid amount', error);
+                    document.getElementById('formattedUnpaidAmount').textContent = 'Rp0,00';
+                });
+        }
+
+        function fetchOverdueAmount() {
+            const selectedYear = document.getElementById('yearSelect').value;
+            const url = `/api/dashboard/overdue-amount` + (selectedYear ? `?year=${selectedYear}` : '');
+
+            fetch(url, { cache: "no-store" })
+                .then(response => response.json())
+                .then(data => {
+                    const formattedOverdueAmount = document.getElementById('formattedOverdueAmount');
+                    formattedOverdueAmount.textContent = formatAmount(data);
+                })
+                .catch(error => {
+                    console.error('Failed to fetch overdue amount', error);
+                    document.getElementById('formattedOverdueAmount').textContent = 'Rp0,00';
+                });
+        }
+
+        function drawChartNumber() {
+            const selectedYear = document.getElementById('yearSelect').value;
+            const url = `/api/dashboard/invoices-per-month` + (selectedYear ? `?year=${selectedYear}` : '');
+
+            fetch(url, { cache : "no-store"})
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        document.getElementById('chart_invoice').innerHTML = '<div class="text-center">No data available in the system</div>';
+                    }
+                    else {
+                        const dataTable = new google.visualization.DataTable();
+                        dataTable.addColumn('string', 'Month');
+                        dataTable.addColumn('number', 'Number of Invoices');
+
+                        data.forEach(item => {
+                            dataTable.addRow([item.month, item.count]);
+                        });
+
+                        const options = {
+                            hAxis: {title: 'Month', titleTextStyle: {color: '#333'}},
+                            vAxis: {minValue: 0, title: 'Number of Invoices', format: '0'},
+                            legend: 'none',
+                            chartArea: {width: '70%', height: '70%'},
+                            colors: ['#3f2685'],
+
+                        };
+
+                        const chart = new google.visualization.ColumnChart(document.getElementById('chart_invoice'));
+                        chart.draw(dataTable, options);
+                    }})
+                .catch(error => console.error('Error loading the data:', error));
+        }
+
+        function drawChartStatus() {
+            const selectedYear = document.getElementById('yearSelect').value;
+            const url = `/api/invoices/status-per-month` + (selectedYear ? `?year=${selectedYear}` : '');
+            
+            fetch(url, { cache : "no-store" })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        document.getElementById('chart_status').innerHTML = '<div class="text-center">No data available in the system</div>';  
+                    }
+                    else {
+                        const dataTable = new google.visualization.DataTable();
+                        dataTable.addColumn('string', 'Month');
+                        dataTable.addColumn('number', 'Paid Invoices');
+                        dataTable.addColumn('number', 'Unpaid Invoices');
+
+                        data.forEach(item => {
+                            dataTable.addRow([item.month.toString(), item.paidInvoices, item.unpaidInvoices]);
+                        });
+
+                        const options = {
+                            isStacked: true,
+                            hAxis: { title: 'Month' },
+                            vAxis: { title: 'Number of Invoices', format: '0' },
+                            legend: { position: 'top', maxLines: 3 },
+                            chartArea: {width: '70%', height: '70%'},
+                            series: {
+                            0: { color: '#3f2685' }, // Paid Invoices
+                            1: { color: '#a0153e' }     // Unpaid Invoices
+                        }
+                        };
+
+                        const chart = new google.visualization.ColumnChart(document.getElementById('chart_status'));
+                        chart.draw(dataTable, options);
+                    }})
+                .catch(error => console.error('Error loading the data:', error));
+        }
+
+        function drawChartTax() {
+            const selectedYear = document.getElementById('yearSelect').value;
+            const url = `/api/dashboard/tax-gain-chart` + (selectedYear ? `?year=${selectedYear}` : '');
+            
+            fetch(url, { cache : "no-store" }) 
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json(); 
+                })
+                .then(taxData => {
+                    if (taxData.length === 0) { 
+                        document.getElementById('chart_tax').innerHTML = '<div class="text-center">No data available in the system</div>';  
+                        return; 
+                    }
+
+                    drawLineChart(taxData); 
+                })
+                .catch(error => {
+                    console.error("Error fetching tax gain data:", error);
+                });
+        }
+
+        function drawLineChart(taxData) {
+            var data = new google.visualization.DataTable(); 
+            data.addColumn('string', 'Month');
+            data.addColumn('number', 'Total Tax');
+
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+            taxData.forEach(function (item) {
+                var monthName = monthNames[item.month - 1]; 
+                data.addRow([monthName, item.totalTax]);
+            });
+
+            var options = {
+                hAxis: { 
+                title: 'Month' 
+                },
+                vAxis: { title: 'Total Tax', 
+                        minValue: 0 ,
+                        format: '#', 
+                    },
+                legend: 'none',
+                pointSize: 5,
+                curveType: 'function',
+                colors: ['#3f2685'],
+                chartArea: {width: '70%', height: '70%'},
+            };
+
+            var chart = new google.visualization.LineChart(document.getElementById('chart_tax'));
+            chart.draw(data, options);
+        }
+        
+        function formatAmount(value) {
+            if (isNaN(value)) {
+                return 'Rp0,00';
+            }
+            const formatter = new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 2
+            });
+            return formatter.format(value);
+        }
+    </script>
+
+</body>
+</html>

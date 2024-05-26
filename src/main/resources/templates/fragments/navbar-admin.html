@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+    <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+</head>
+
+<body>
+    <nav th:fragment="navbar-admin" th:if="${role.contains('Admin')}" class="navbar navbar-expand-lg navbar-bg  p-3">
+        <div class="container-fluid theme-color">
+            <a class="navbar-brand" th:href="@{/home}">
+                <img th:src="@{/assets/nav-logo.png}" alt="INVOICESYNC Logo" style="width: 240px;" />
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+                aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class=" collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav ms-auto ">
+                    <ul class="navbar-nav ms-auto ">
+                        <li class="nav-item">
+                            <a th:classappend="${page == 'Home'} ? active : ''" class="nav-link mx-2" th:href="@{/home}">
+                                <img th:src="@{/assets/icon/home.svg}" alt="dashboard-square-01" width="24" height="24" />
+                                Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a th:classappend="${page == 'Employee Management'} ? active : ''" class="nav-link" th:href="@{/employees}">
+                                <img th:src="@{/assets/icon/employee-mgm.svg}" alt="user-multiple-02" width="24" height="24" />
+                                Employee Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a th:classappend="${page == 'Approval Flows Management'} ? active : ''" class="nav-link" th:href="@{/approval-flows}">
+                                <img th:src="@{/assets/icon/approval-flow.svg}" alt="workflow-square-03" width="24" height="24" />
+                                Approval Flows Management
+                            </a>
+                        </li>
+                    </ul>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link mx-2 dropdown-toggle nav-profile" href="#" id="navbarDropdownMenuLink" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user" style="margin-right:5px"></i>
+                            <span th:text="${email}"></span>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <li>
+                                <form th:action="@{/logout}" method="post" class="logout-form">
+                                  <button type="submit" class="dropdown-item" style="border: none; background: none; cursor: pointer;">Logout</button>
+                                </form>
+                              </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</body>

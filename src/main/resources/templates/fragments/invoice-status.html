@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+    <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+</head>
+
+<body>
+    <div th:fragment="invoice-status-show" class="invoice-status-tag">
+        <div class="status-tag-item" th:if="${status == 'Draft'}" style="background-color:#9BA3AC">
+            <div class="status-name">Draft</div>
+        </div>
+        <div class="status-tag-item" th:if="${status == 'Waiting for Approver'}" style="background-color:#9BA3AC">
+            <div class="status-name">Waiting for Approver</div>
+        </div>
+        <div class="status-tag-item" th:if="${status == 'Pending Approval'}" style="background-color:#5C5C77">
+            <div class="status-name">Pending Approval</div>
+        </div>
+        <div class="status-tag-item" th:if="${status == 'Need Approval'}" style="background-color:#5C5C77">
+            <div class="status-name">Need Approval</div>
+        </div>
+        <div class="status-tag-item" th:if="${status == 'Approved'}" style="background-color:#3B9C8F;">
+            <div class="status-name">Approved</div>
+        </div>
+        <div class="status-tag-item" th:if="${status == 'Rejected'}" style="background-color:#DB504A;">
+            <div class="status-name">Rejected</div>
+        </div>
+        <div class="status-tag-item" th:if="${status == 'Need Revision'}" style="background-color:#FFDB20">
+            <div class="status-name">Need Revision</div>
+        </div>
+        <div class="status-tag-item" th:if="${status == 'Paid'}"  style="background-color: #3066be;">
+            <div class="status-name">Paid</div>
+        </div>
+    </div>
+</body>

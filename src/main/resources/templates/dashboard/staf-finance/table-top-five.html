@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Top Five Invoices</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            google.charts.load('current', {'packages':['table']});
+            google.charts.setOnLoadCallback(drawTable);
+        });
+
+        function drawTable() {
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Invoice Number');
+            data.addColumn('string', 'Date');
+            data.addColumn('string', 'Customer Name');
+            data.addColumn('number', 'Grand Total');
+
+            var topFiveInvoices = /*[[${topFiveInvoices}]]*/ [];
+            console.log("Data for Table: ", topFiveInvoices);
+
+            topFiveInvoices.forEach(function (invoice) {
+                data.addRow([
+                    invoice.invoiceNumber,
+                    invoice.invoiceDate.toString(),
+                    invoice.customer.name.toString(), 
+                    invoice.grandTotal.doubleValue()
+                ]);
+            });
+
+            var options = {
+                showRowNumber: true,
+                width: '100%',
+                height: 'auto'
+            };
+
+            var table = new google.visualization.Table(document.getElementById('invoice_table'));
+            table.draw(data, options);
+        }
+    </script>
+</head>
+<body>
+    <div id="invoice_table" style="width: 100%;"></div>
+    <div th:if="${#lists.isEmpty(topFiveInvoices)}">
+        <p>No recent invoices to display.</p>
+    </div>
+</body>
+</html>

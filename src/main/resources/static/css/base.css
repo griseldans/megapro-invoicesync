@@ -1,0 +1,621 @@
+/* Reset default styles */
+html, body {
+    font-family: 'Poppins', sans-serif;
+    font-size: 15px;
+    background: #FFF;
+    box-sizing: border-box;
+}
+
+h2{
+    color:#3F2685;
+    font-size:xx-large;
+    font-weight: 600;
+}
+
+h3{
+    color:#3F2685;
+    font-size: x-large;
+}
+
+h4{
+    font-size: large;
+    color: #5C5C77;
+}
+
+/* Navbar */
+.nav-link {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    color: black;
+    padding: 10px;
+}
+
+.nav-link img {
+    margin-right: 5px;
+}
+
+.active {
+    font-weight: bold;
+}
+
+/* Container */
+.container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: auto;
+    max-width: 1200px;
+    padding-top:3%;
+    padding-bottom:3%;
+}
+
+.grid-child {
+    padding: 5px;
+    border: 1px solid #000;
+}
+
+.grid-child {
+    padding: 5px;
+    border: 1px solid #000;
+}
+
+.grid-child {
+    padding: 5px;
+    border: 1px solid #000;
+}
+
+.container-title{
+    text-align: left;
+}
+
+.header{
+    display: flex;
+    flex-direction: column;
+    /* max-width: 1240px; */
+}
+
+.sidebar{
+    order:2;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    color: #000;
+    min-height: 500px;
+    margin: 20px;
+}
+
+.content {
+    flex-grow: 5;
+    min-width: 630px;
+}
+
+/* Invoice Status Tag */
+.status-tag-item {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    color: #fff;
+    font-size: 14px;
+    margin-right: 5px;
+    text-transform: uppercase;
+}
+
+.status-name {
+    padding: 5px 10px;
+    border-radius: 15px;
+}
+
+/* Navbar */
+.navbar {
+    background: #EEF2F5;
+}
+
+.nav-profile, 
+.nav-profile:hover, 
+.nav-profile:active,
+.nav-profile:focus{
+    background: #3F2685;
+    border-radius: 0.5rem;
+    color: #fff; 
+}
+
+.theme-color, .invoice-number{
+    color: #3F2685; 
+}
+
+/* Sign-in Button */
+.btn-primary, .btn-signin {
+    background-color: #3F2685; 
+    border-color: #3F2685;
+    color: white;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: #5d3ca4; 
+    border-color: #5d3ca4;
+    box-shadow: 0 0 0 .2rem rgb(104 37 200 / 50%);
+}
+
+.btn-primary:active,
+.btn-primary.active,
+.show > .btn-primary.dropdown-toggle {
+    background-color: #5722ca; 
+    border-color: #5722ca;
+}
+
+/* Sequence */
+.sequence{
+    color: #5C5C77;
+    text-align: left;
+}
+
+/* Cards */
+.card {
+    background-color:#fcfcfc;
+    border: 2px solid #EEF2F5;
+    border-radius: 0.7rem;
+    padding: 4px;
+}
+
+.card-borderless{
+    border: #FFF;
+}
+
+.card-title{
+    text-align: center;
+}
+
+.card-text {
+    color: #3F2685;
+}
+
+.card-info {
+    background-color: #9CB0C9;
+    background-color: #9CB0C9;
+    display: inline-block;
+    padding: 8px;
+    border-radius: 0.7rem;
+}
+
+.card small-card-title {
+  background: #3F2685;
+  color: #FFF;
+}
+
+/* Forms */
+.form {
+    background: #FBFCFE;
+}
+
+.form-control {
+    border-radius: 0.7rem;
+}
+
+.card-header {
+    background: rgb(255, 255, 255);
+}
+
+/* Tables */
+.table td{
+  vertical-align: middle;
+}
+
+.table th {
+  vertical-align: middle;
+  border-bottom: 2px solid rgb(222, 226, 230);
+  background-color: #3F2685;
+  text-align: center;
+  color:#fff;
+}
+
+.table-bordered-classic th,
+.table-bordered-classic td {
+    border: 1px solid #3F2685;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.text-violet {
+    color: #3F2685;
+}
+
+.theme-color {
+    color: #3F2685; 
+}
+
+.table-custom {
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 20px;
+    text-align: center;
+}
+.table-custom thead {
+    background-color: #3F2685;
+    color: white;
+}
+.table-custom th, .table-custom td {
+    border: none;
+}
+.table-custom tbody tr {
+    background-color: #E3E6F0;
+}
+.table-custom tbody tr:nth-of-type(even) {
+    background-color: #fff;
+}
+.status-approved {
+    color: green;
+}
+.status-rejected {
+    color: red;
+}
+.table-title {
+    font-size: 24px;
+    color: #3F2685;
+    margin-bottom: 16px;
+    font-weight: bold;
+}
+
+.theme-color {
+    color: #3F2685;
+}
+
+/* Added CSS for button text color */
+.btn-delete {
+    color: white;
+}
+
+/* Added CSS for rounded photo */
+.rounded-photo {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+
+/* Added CSS for employee info container */
+.employee-info {
+    flex-grow: 1;
+}
+
+.employee-info h5,
+.employee-info p {
+    margin-bottom: 2px; /* Adjust the margin as needed */
+    padding-left: 20px; /* Adjust the padding as needed */
+}
+
+
+/* Added CSS for default black photo */
+.default-photo {
+    background-color: #000;
+}
+
+/* Drag Area */
+.drag-area{
+    border: 2px dashed #3F2685;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    height: 150px;
+}
+
+.drag-area.active{
+    border: 2px solid #3F2685;
+}
+
+.drag-area .icon{
+    font-size: 40px;
+    color: #3F2685;
+}
+
+.drag-area header{
+    color: #3F2685;
+}
+
+.drag-area span{
+    font-size: 13px;
+    color: #3F2685;
+    margin: 5px 0 5px 0;
+}
+
+.drag-area button{
+    padding: 5px 20px;
+    font-size: 15px;
+    border: none;
+    outline: none;
+    background: #3F2685;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom:10px;
+}
+
+.drag-area img{
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+/* List of Employee */
+.grid-container {
+    display: grid;
+    /* Adjust the minmax for the desired card width */
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    margin: 0 auto; /* Center the grid container */
+}
+.rounded-circle {
+    border-radius: 50%;
+    width: 80px; /* Ensure this matches the width of your image */
+    height: 80px; /* Ensure this matches the height of your image */
+    object-fit: cover;
+}
+.card-employee{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,.1);
+    padding: 1rem;
+    border-radius: 0.5rem; /* Optional: for rounded corners */
+}
+
+.card-employee img {
+    width: 80px; /* Adjust as needed */
+    height: 80px;
+    object-fit: cover;
+    margin-bottom: 1rem;
+}
+.card-body {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+@media (max-width: 768px) {
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Approval Logs */
+.grid-container-invoice-logs {
+    display: grid;
+    grid-template-columns: 5fr 2fr;
+    gap: 20px;
+}
+
+.grid-container-invoice-logs-child {
+    padding-top: 10px;
+}
+
+.container-logs {
+    width: 100%;
+}
+
+.left {
+    grid-area: left;
+}
+.name { 
+    grid-area: name;
+    color: #5d3ca4
+}
+.date { 
+    grid-area: date;
+    color: #9BA3AC;
+}
+.position { 
+    grid-area: position; 
+    color: #9BA3AC;
+}
+.status { 
+    grid-area: status;
+    vertical-align: middle;
+}
+.additional { 
+    grid-area: additional;
+}
+
+.grid-container-logs{
+    display: grid;
+    grid-auto-flow: row-reverse;
+    row-gap: 10px;
+    width: 90%;
+}
+
+.grid-container.log {
+    display: grid;
+    grid-template-areas:
+        'left name date'
+        'left position status'
+        'left additional additional';
+    grid-template-columns: 1fr 3fr 2fr;
+    gap: 3px;
+    width: 100%;
+    font-size: smaller;
+}
+
+.grid-container.log .date,
+.grid-container.log .status {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.oval-status {
+    width: 85%;
+    border-radius: 25px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.grid-container.log p {
+    padding: 0;
+    margin: 0;
+}
+
+.rounded-photo.log {
+    width: 30px;
+    height: 30px;
+}
+
+.profile-info {
+    display: flex;
+    align-items: center;
+}
+
+.profile-photo {
+    margin-right: 20px; 
+}
+
+.profile-details {
+    flex: 1; 
+}
+
+.profile-details h4,
+.profile-details p {
+    margin: 5px 0; /* Adjust the top and bottom margin */
+}
+
+.button-profile-page a {
+    margin-left: 10%;
+    margin-right: 10%;
+}
+
+/* Notification */
+.icon {
+    cursor: pointer;
+}
+.icon img {
+    display: inline-block;
+    width: 26px;
+    margin-left: 30px;
+}
+.icon:hover {
+    opacity: .7;
+}
+.logo {
+    flex: 1;
+    margin-left: 50px;
+    color: #eee;
+    font-size: 20px;
+    font-family: monospace;
+}
+.notifications {
+    width: 300px;
+    height: 0px;
+    opacity: 0;
+    position: absolute;
+    top: 63px;
+    right: 62px;
+    border-radius: 5px 0px 5px 5px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.notifications h2 {
+    font-size: 14px;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    color: #999;
+}
+.notifications h2 span {
+    color: #f00;
+}
+.dropdown-menu.dropdown-menu-notification{
+    width: 300px;
+    max-height: 230px;
+    overflow-y: scroll;
+}
+.notifications-item {
+    display: flex;
+    border-bottom: 1px solid #eee;
+    padding: 6px 9px;
+    margin-bottom: 0px;
+    cursor: pointer;
+}
+.notifications-item:hover {
+    background-color: #eee;
+}
+.notifications-item img {
+    display: block;
+    width: 50px;
+    height: 50px;
+    margin-right: 9px;
+    border-radius: 50%;
+    margin-top: 2px;
+}
+.notifications-item .text h4 {
+    color: #777;
+    font-size: 16px;
+    margin-top: 3px;
+}
+.notifications-item .text p {
+    color: #aaa;
+    font-size: 12px;
+}
+
+/* Dashboard */
+.dashboard-col {
+    background-color:#fcfcfc;
+    border: 2px solid #EEF2F5; 
+    border-radius: 0.7rem;
+    padding: 20px;
+}
+
+.dashboard-row {
+    margin-bottom: 15px;
+}
+
+.dashboard-col-middle{
+    background-color:#fcfcfc;
+    border: 2px solid #EEF2F5; 
+    border-radius: 0.7rem;
+    padding: 20px;
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.dashboard-col-left{
+    background-color:#fcfcfc;
+    border: 2px solid #EEF2F5; 
+    border-radius: 0.7rem;
+    padding: 20px;
+    margin-right: 15px;
+}
+
+/* Approval Hierarchy */
+.flow-box {
+    background-color: #fff;
+    border: 1px solid #E3E6EB;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    padding: 16px;
+    font-size: 16px;
+    color: #3F2685;
+    line-height: 1.4;
+    box-shadow: 0 2px 4px 0 rgba(0,0,0,.05);
+}
+
+.card-custom{
+    background-color: #FFFFFF;
+    border-radius: 8px;
+    border: none;
+    box-shadow: 0 0 15px 0 rgba(0,0,0,.05);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+.form-control, .form-select {
+    background-color: #ECEEF1;
+    border-color: #ECEEF1;
+    color: #4E5559;
+}
+.form-control::placeholder, .form-select option {  
+    color: #B1B5B8;
+}

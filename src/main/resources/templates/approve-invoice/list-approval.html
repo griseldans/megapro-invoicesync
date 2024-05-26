@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice Approval | InvoiceSync</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+    <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+    <object th:include="~{fragments/common :: dataTables}" th:remove="tag"></object>
+</head>
+<body>
+    <nav th:if="${role == 'Non-Finance Manager'}" th:replace="~{fragments/navbar-non-finance :: navbar-non-finance-manager(page='Approve-Invoice')}"></nav>
+    <nav th:if="${role == 'Finance Staff'}" th:replace="~{fragments/navbar-finance :: navbar-finance-staff(page='Approve-Invoice')}"></nav>
+    <nav th:if="${role == 'Finance Manager'}" th:replace="~{fragments/navbar-finance :: navbar-finance-exc(page='Approve-Invoice')}"></nav>
+
+    <div class="container">
+        <div class="card-title">
+            <h2>Approve Invoice</h2>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <p>Click on the invoice number to proceed with approval.</p>
+                <table id="upperTable" class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Invoice Number</th>
+                            <th>Client Name</th>
+                            <th>Grand Total</th>
+                            <th>Your Approval</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="invoice, iterStat : ${needApproval}" th:if="${invoice.customer != null}">
+                            <td th:text="${iterStat.count}"></td>
+                            <td>
+                                <a th:href="@{/approval/{invoiceNumber}(invoiceNumber=${invoice.invoiceNumber != null ? invoice.invoiceNumber.replace('/', '_') : 'Dummy'}, approvalId=${invoice.approvalId})}"
+                                   th:text="${invoice.invoiceNumber}"
+                                   name="approvalId"
+                                   th:value="${invoice.approvalId}"></a>
+                            </td>
+                            <td th:text="${invoice.customer.name}"></td>
+                            <td th:text="${'Rp' + #numbers.formatDecimal(invoice.grandTotal, 0, 'POINT', 2, 'COMMA')}"></td>
+                            <td th:with="status=${invoice.approvalStatus}" th:include="fragments/invoice-status :: invoice-status-show"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 5vh;">
+            <div class="card-body">
+                <h3>Previous Approvals</h3>
+                <table id="lowerTable" class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Invoice Number</th>
+                            <th>Client Name</th>
+                            <th>Grand Total</th>
+                            <th>Your Approval</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="invoice, iterStat : ${previousApproval}" th:if="${invoice.customer != null}">
+                            <td th:text="${iterStat.count}"></td>
+                            <td>
+                                <a th:href="@{/approval/{invoiceNumber}(invoiceNumber=${invoice.invoiceNumber != null ? invoice.invoiceNumber.replace('/', '_') : 'Dummy'}, approvalId=${invoice.approvalId})}"
+                                   th:text="${invoice.invoiceNumber}"
+                                   name="approvalId"
+                                   th:value="${invoice.approvalId}"></a>
+                            </td>
+                            <td th:text="${invoice.customer.name}"></td>
+                            <td th:text="${'Rp' + #numbers.formatDecimal(invoice.grandTotal, 0, 'POINT', 2, 'COMMA')}"></td>
+                            <td th:with="status=${invoice.approvalStatus}" th:include="fragments/invoice-status :: invoice-status-show"></td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(previousApproval)}">
+                            <td colspan="5" class="text-center">You haven't given any approvals yet.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $('#upperTable').DataTable({
+                "language": {
+                    "emptyTable": "You have nothing to approve yet."
+                }
+            });
+            $('#lowerTable').DataTable({
+                "language": {
+                    "emptyTable": "You have no previous approvals."
+                }
+            });
+        });
+    </script>
+</body>
+</html>

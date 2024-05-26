@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8" />
+  <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+  <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+  <title>Approval Invoice | InvoiceSync</title>
+</head>
+
+<body>
+    <nav th:if="${role == 'Non-Finance Staff'}" th:replace="~{fragments/navbar-non-finance :: navbar-non-finance-staff(page = 'My-Invoice')}"></nav>
+    <nav th:if="${role == 'Non-Finance Manager'}" th:replace="~{fragments/navbar-non-finance :: navbar-non-finance-manager(page='Approve-Invoice')}"></nav>
+    <nav th:if="${role == 'Finance Staff'}" th:replace="~{fragments/navbar-finance :: navbar-finance-staff(page='Approve-Invoice')}"></nav>
+    <nav th:if="${role == 'Finance Manager'}" th:replace="~{fragments/navbar-finance :: navbar-finance-exc(page='Approve-Invoice')}"></nav>
+
+    <div class="container">
+        <div class="card-title">
+            <h2>Approval of Invoice</h2>
+        </div>
+        <div class="modal fade" id="exampleModalCenter" tabindex="-1" aria-labelledby="exampleModalCenterTitle" aria-hidden="true" style="display: none;">
+            <!-- Modal detail revisi -->
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalCenterTitle">Revision Detail</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/revision-invoice" method="post" th:object="${approvalDTO}" enctype="multipart/form-data">
+                    <div class="modal-body">
+                            <input class="form-control" type="hidden" th:field="*{approvalId}">
+                            <div class="mb-3">
+                            <label for="message-text" class="col-form-label">Comment<span style="color: #E93D3D;">*</span></label>
+                            <textarea class="form-control" id="message-text" th:field="*{comment}"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="files" class="col-form-label">Additional documents:</label>
+                                <input class="form-control" type="file" id="files" name="files" multiple>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary">Revise</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="form-buttons" th:if="${status == 'Need Approval'}">
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#approveModal">
+                Approve
+            </button>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal">
+                Reject
+            </button>
+            <!-- <button class="btn btn-danger" type="submit" formaction="@{/reject-invoice}">Reject</button> -->
+            <button class="btn btn-warning" type="submit" data-bs-toggle="modal" data-bs-target="#exampleModalCenter">
+                Need Revision
+            </button>
+        </div>
+    <!-- </div> -->
+    <div class="grid-container-invoice-logs">
+        <!-- Bagian invoice -->
+        <div class="grid-container-invoice-logs-child">
+            <div class="card">
+                <div class="card-body">
+                <div class="container-title">
+                    <div class="row">
+                        <div class="col" style="text-align:left;">
+                            <h3 th:text="${invoice.invoiceNumber}"></h3>
+                        </div>
+                        <div class="col" style="text-align:right;" th:include="fragments/invoice-status :: invoice-status-show"></div>
+                    </div>
+                </div>
+                <hr>
+                <div class="content">
+                    <div class="justify-content-center">
+                        <div class="row">
+                            <div class="col">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><p class="card-text mb-0">Customer</p></td>
+                                        <td><input class="form-control" type="text" th:value="${invoice.customer.name}" readonly /></td>     
+                                    </tr>
+                                    <tr>
+                                        <td><p class="card-text mb-0">Contact</p></td>
+                                        <td><input class="form-control" type="text" th:value="${invoice.customer.contact}" readonly /></td>
+                                    </tr>
+                                    <tr>
+                                        <td><p class="card-text mb-0">Address</p></td>
+                                        <td><input class="form-control" type="text" th:value="${invoice.customer.address}" readonly /></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><p class="card-text">Invoice Date</p></td>
+                                        <td><input class="form-control" th:value="${date}" readonly /></td>
+                                    </tr>
+                                    <tr>
+                                        <td><p class="card-text">Due Date</p></td>
+                                        <td><input class="form-control" type="date" th:value="${invoice.dueDate}" readonly/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        <p class="card-text">Attach Product List (.xlsx)</p>
+                        <input type="file" class="form-control" id="file" name="file" accept=".xlsx">
+                        <br>
+    
+                        <table class="table table-bordered">
+                            <thead class="bg-dark text-white">
+                                <tr>
+                                    <th>No</th>
+                                    <th>Description</th>
+                                    <th>Quantity</th>
+                                    <th>Price/Qty</th>
+                                    <th>Total Price</th>
+                                </tr>
+                            </thead> 
+                            <tbody>
+                                <tr th:each="product, iterationStatus: ${listProduct}">
+                                    <td th:text="${iterationStatus.count}">#</td>
+                                    <td th:text="${product.description}"></td>
+                                    <td th:text="${product.quantity}"></td>
+                                    <td th:text="${product.price}"></td>
+                                    <td th:text="${product.totalPrice}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+    
+                        <hr>
+    
+                        <div class="row">
+                            <div class="col">
+                                <div class="mb-4">
+                                    <p class="card-text">Payment Information</p>
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td><p class="card-text">Bank Name</p></td>
+                                            <td><input class="form-control" type="text" th:field="${invoice.bankName}" readonly /></td>
+                                        </tr>
+                                        <tr>
+                                            <td><p class="card-text">Account Number</p></td>
+                                            <td><input class="form-control" type="text" th:field="${invoice.accountNumber}" readonly/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><p class="card-text">Account Name</p></td>
+                                            <td><input class="form-control" type="text" th:field="${invoice.accountName}" readonly/></td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div class="col">
+                                <div class="mb-4">
+                                <table class="table table-bordered-classic">
+                                    <tr>
+                                        <td><p class="card-text">Subtotal</p></td>
+                                        <td>
+                                            <input class="form-control" type="number" th:field="${invoice.subtotal}" readonly />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><p class="card-text">Total Discount (%)</p></td>
+                                        <td><input class="form-control" type="number" th:field="${invoice.totalDiscount}" readonly/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><p class="card-text">Tax</p></td>
+                                        <td>
+                                            <div id="taxList" th:each="tax : ${taxList}">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" 
+                                                        value="${tax.taxId}" 
+                                                        id="${tax.taxId}" 
+                                                        th:checked="${#lists.contains(invoice.listTax.![taxId], tax.taxId)}" disabled>
+                                                    <label class="form-check-label" for="${tax.taxId}" th:text="${tax.taxName}">
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><p class="card-text">Taxes</p></td>
+                                        <td>
+                                            <input class="form-control" th:field="${invoice.taxTotal}" type="number" disabled />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><p class="card-text">Grand Total</p></td>
+                                        <td>
+                                            <input class="form-control" th:field="${invoice.grandTotal}" type="number"  disabled />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><p class="card-text">Amount in Words</p></td>
+                                        <td><input class="form-control" type="text" th:field="${invoice.totalWords}" readonly/></td>
+                                    </tr> 
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+
+                    <div class="row">
+                        <div class="col">
+                            <div class="mb-4">
+                                <p class="card-text">Additional Document</p>
+                                <div class="additional-document" style="margin-top: 10px;">
+                                    <span th:each="file: ${documents}">
+                                        <i class="fa fa-file-alt fa-lg" aria-hidden="true"></i>
+                                        <a th:href="${file.fileUrl}" th:text="${file.fileName}" class="mb-2"></a>
+                                        <p></p>
+                                    </span>
+                                </div>
+                                <!-- 
+                                <input type="file" class="form-control" name="file"/>
+                                <input type="hidden" th:value="${invoice.additionalDocument}" />
+                                -->
+                            </div>
+                        </div>
+
+                        <div class="col">
+                            <div class="mb-4">
+                                <p class="card-text">Signature</p>
+                                <div class="form-inline">
+                                    <div class="form-group mr-2">
+                                        <input class="form-control" type="text" th:value="${invoice.city}"  readonly/>
+                                    </div>
+                                    <div class="form-group">
+                                        <p class="card-text" th:text="', '+${dateInvoice}"></p>
+                                    </div>
+                                </div>
+                                <br>
+                                <div class="drag-area">
+                                    <img class="card-img-top" th:src="@{'data:image/jpeg;base64,' + ${image}}" alt="signature-image" style="max-height:150px;">
+                                </div>
+                                <br>
+                                <input class="form-control" type="text" th:value="${invoice.staffEmail}" hidden />
+                                <p class="card-text" th:text="'Created by: ' + ${employee.first_name} + ' ' + ${employee.last_name}"></p>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- Bagian approval log -->
+        <div class="grid-container-invoice-logs-child">
+            <div class="container-logs">
+                <div class="container title" style="text-align: center; margin-bottom: 0;">
+                    <h3>Approval Log</h3>
+                </div>
+                <hr>
+                <div class="grid-container-logs" th:each="log: ${approvalLogs}">
+                    <div class="grid-container log mb-3">
+                        <div class="left">
+                            <img src="" alt="" class="rounded-photo log default-photo">
+                        </div>
+                        <div class="name">
+                            <b><p th:text="${log.employeeName}"></p></b>
+                        </div>
+                        <div class="date">
+                            <i><p style="font-size: smaller;" th:text="${log.approvalDate}">3 April 2023</p></i>
+                        </div>
+                        <div class="position">
+                            <p th:text="${log.employeeRole}"></p>
+                        </div>
+                        <div class="status">
+                            <!-- Status Approved -->
+                            <div th:if="${log.approvalStatus == 'Approved'}"
+                                class="oval-status" style="background-color: #3B9C8F;">
+                                <p style="
+                                    font-size: smaller;
+                                    color: whitesmoke;
+                                    "><b>Approved</b></p>
+                            </div>
+
+                            <!-- Status Revisi -->
+                            <div th:if="${log.approvalStatus == 'Need Revision'}"
+                                class="oval-status" style="background-color: #FFDB20;">
+                                <p style="
+                                    font-size: smaller;
+                                    color: white;
+                                    "><b>Need Revision</b></p>
+                            </div>
+
+                            <!-- Status Rejected -->
+                            <div th:if="${log.approvalStatus == 'Rejected'}"
+                                class="oval-status" style="background-color: #E93D3D;">
+                                <p style="
+                                    font-size: smaller;
+                                    color: whitesmoke;
+                                    "><b>Rejected</b></p>
+                            </div>
+                        </div>
+                        <div class="additional" th:if="${log.approvalStatus == 'Need Revision'}">
+                            <div class="additional-content" style="
+                                    background-color: #ECF1F4; 
+                                    border-radius: 25px;
+                                    border-top-left-radius: 0;
+                                    padding: 10px;
+                                    padding-top: 5px;">
+                                <span style="margin-bottom: 10px;"><b>Comment</b></span>
+                                <p th:text="${log.comment}"></p>
+                                <div class="additional-document" style="margin-top: 10px;">
+                                    <span th:each="file: ${log.filesDTO}">
+                                        <a th:href="${file.fileUrl}" th:text="${file.fileName}" class="mb-2" style="font-size: smaller;"></a>
+                                        <p></p>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Approve Modal -->
+    <div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="approveModalLabel">Confirm Approval</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            Are you sure you want to approve this invoice?
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <form action="/approve-invoice" method="post" th:object="${approvalDTO}" style="display: inline-block;">
+                <input class="form-control" type="hidden" th:field="*{approvalId}">
+                <button type="submit" class="btn btn-success">Approve</button>
+            </form>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="rejectModalLabel">Confirm Rejection</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            Are you sure you want to reject this invoice?
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <form action="/reject-invoice" method="post" th:object="${approvalDTO}" style="display: inline-block;">
+                <input class="form-control" type="hidden" th:field="*{approvalId}">
+                <button type="submit" class="btn btn-danger">Reject</button>
+            </form>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- Approve Modal -->
+    <div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="approveModalLabel">Confirm Approval</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            Are you sure you want to approve this invoice?
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <form action="/approve-invoice" method="post" th:object="${approvalDTO}" style="display: inline-block;">
+                <input class="form-control" type="hidden" th:field="*{approvalId}">
+                <button type="submit" class="btn btn-success">Approve</button>
+            </form>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- Reject Modal -->
+    <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="rejectModalLabel">Confirm Rejection</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            Are you sure you want to reject this invoice?
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <form action="/reject-invoice" method="post" th:object="${approvalDTO}" style="display: inline-block;">
+                <input class="form-control" type="hidden" th:field="*{approvalId}">
+                <button type="submit" class="btn btn-danger">Reject</button>
+            </form>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>   
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account | InvoiceSync</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+  <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+  <style>
+  </style>
+</head>
+
+<body>
+  <nav th:replace="~{fragments/navbar-admin :: navbar-admin(page = 'Employee Management')}"></nav>
+  <div class="container">
+    <div class="card-title">
+      <h2>Register Account</h2>
+    </div>
+    <form id="createAccountForm" th:action="@{/create-account}" th:object="${employeeDTO}" method="POST">
+    <div class="button" style="margin-bottom:10px;">
+      <button type="submit" class="btn btn-primary">Create</button>
+      <a href="/employees" class="btn btn-danger">Cancel</a>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="form-group">
+          <label for="email" >Email</label>
+          <input type="text" id="email" class="form-control"
+            placeholder="Enter a valid email address" th:field="*{email}" required />
+        </div>
+
+        <div class="form-group">
+          <label for="nomorHp">Phone Number</label>
+          <input type="text" id="nomorHp" class="form-control"
+            placeholder="Enter a valid phone number" th:field="*{nomorHp}" required />
+        </div>
+
+        <div class="form-group">
+          <label for="id">Role</label>
+          <select id="id" class="form-control" name="role.id">
+              <option th:each="role: ${listRole}" th:value="${role.id}" th:text="${role.role}"></option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" class="form-control"
+            placeholder="Enter password" th:field="*{password}"required />
+        </div>
+      </form>
+    </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalLabel">Success</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p id="successMessage"></p>
+        </div>
+        <div class="modal-footer">
+          <a class="btn btn-signin btn-lg btn-block" href="/home">Home</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalLabel">Error</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p id="errorMessage"></p>
+        </div>
+        <div class="modal-footer">
+          <a class="btn btn-primary" href="/create-account">Retry</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script th:inline="javascript">
+  $(document).ready(function() {
+      
+      var successMessage = /*[[${successMessage}]]*/ null;
+      var errorMessage = /*[[${errorMessage}]]*/ null;
+      
+      console.log("Success message:", successMessage); // Log success message
+      console.log("Error message:", errorMessage); // Log error message
+      
+      // Check if success message is not null or empty
+      if (successMessage && successMessage.trim() !== '') {
+        $("#successMessage").text(successMessage); // Set success message text
+        $("#successModal").modal('show'); // Show success modal
+      } 
+      // Check if error message is not null or empty
+      else if (errorMessage && errorMessage.trim() !== '') {
+        $("#errorMessage").text(errorMessage); // Set error message text
+        $("#errorModal").modal('show'); // Show error modal
+      } else {
+        console.log("No message to display."); // Log if no message to display
+      }
+  });
+
+</script>
+</body>
+</html>

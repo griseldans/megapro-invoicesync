@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+    <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+    <title>Invoices | InvoiceSync</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav th:replace="~{fragments/navbar-non-finance :: navbar-non-finance-manager(page='All-Invoices-List')}"></nav>
+    <div class="container">
+        <div class="card-title">
+            <h2 th:text="'Invoice History - ' + ${division}"></h2>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <p>Click on the invoice number to view the details.</p>
+                <form class="row align-items-center" th:action="@{/invoices/division/{division}(division=${division})}" method="GET">
+                    <div class="col-auto">
+                        <img src="https://cdn.hugeicons.com/icons/filter-horizontal-stroke-rounded.svg" alt="filter-horizontal" width="24" height="24" />
+                        <label style="margin-bottom:0px" for="filterDropdown">Filter:</label>
+                    </div>
+                    <div class="col-auto">
+                        <select class="form-control" id="filterDropdown" name="status">
+                            <option th:selected="${status == null or status == ''}"></option>
+                            <option th:selected="${status == 'Waiting for Approver'}" value="Waiting for Approver">Waiting for Approver</option>
+                            <option th:selected="${status == 'Pending Approval'}" value="Pending Approval">Pending Approval</option>
+                            <option th:selected="${status == 'Approved'}" value="Approved">Approved</option>
+                            <option th:selected="${status == 'Rejected'}" value="Rejected">Rejected</option>
+                            <option th:selected="${status == 'Need Revision'}" value="Need Revision">Need Revision</option>
+                            <option th:selected="${status == 'Waiting for Payment'}" value="Waiting for Payment">Waiting for Payment</option>
+                            <option th:selected="${status == 'Paid'}" value="Paid">Paid</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary">Apply</button>
+                    </div>
+                </form>
+                <table class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>ID</th>
+                            <th>Invoice Number</th>
+                            <th>Client Name</th>
+                            <th>Total Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="invoice, iterStat : ${invoices}">
+                            <td th:text="${iterStat.count}"></td>
+                            <td th:text="${invoice.invoiceId}"></td>
+                            <td th:text="${invoice.invoiceNumber}">4</td>
+                            <td th:text="${invoice.customerName}"></td>
+                            <td th:text="${'Rp' + #numbers.formatDecimal(invoice.grandTotal, 0, 'POINT', 2, 'COMMA')}"></td>
+                            <!-- The status column will be updated according to your business logic -->
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

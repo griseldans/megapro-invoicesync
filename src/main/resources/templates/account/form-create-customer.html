@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8" />
+  <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+  <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+  <title>Create Customer | InvoiceSync</title>
+</head>
+
+<body>
+    <nav th:replace="~{fragments/navbar-non-finance :: navbar-non-finance-staff(page = 'Create-Invoice')}"></nav>
+    <div class="container">
+        <div class="card-title">
+            <h2>Add New Customer</h2>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <div class="justify-content-center">
+                    <form th:action="@{/create-customer}" th:object="${customerDTO}" method="POST">
+                        <div class="row">
+                            <div class="row-mr-15" style="margin-bottom:8px;">
+                                <p class="card-text mb-0">Name</p>
+                                <input class="form-control" type="text" th:field="*{name}" required/>
+                            </div>
+                            <div class="col-md-6">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><p class="card-text mb-0">Contact</p></td>
+                                        <td><input class="form-control" type="text" th:field="*{contact}" required/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><p class="card-text mb-0">Phone</p></td>
+                                        <td><input class="form-control" type="text" th:field="*{phone}" required /></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <div class="col-md-6">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td style="vertical-align: baseline;"><p class="card-text mb-0">Address</p></td>
+                                        <td><textarea class="form-control" type="text" th:field="*{address}" style="height:100px" required/></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <a class="btn btn-danger" href="/create-invoice">Cancel</a> 
+                            <button class="btn btn-primary" type="submit">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

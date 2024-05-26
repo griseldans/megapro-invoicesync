@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+    <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+</head>
+
+<body>
+    <nav th:fragment="navbar-finance-staff" th:if="${role == 'Finance Staff'}" class="navbar navbar-expand-lg navbar-bg  p-3">
+        <div class="container-fluid theme-color">
+            <a class="navbar-brand" th:href="@{/home}">
+                <img th:src="@{/assets/nav-logo.png}" alt="INVOICESYNC Logo" style="width: 240px;" />
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+                aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class=" collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav ms-auto ">
+                    <li class="nav-item">
+                        <a th:classappend="${page == 'Home'} ? active : ''" class="nav-link mx-2" th:href="@{/home}">
+                            <img th:src="@{/assets/icon/home.svg}" alt="dashboard-square-01" width="24" height="24" />
+                            Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <!-- TODO : Add th:href -->
+                        <a th:classappend="${page == 'Approve-Invoice'} ? active : ''" class="nav-link mx-2" th:href="@{/approval}">
+                            <img th:src="@{/assets/icon/approval.svg}" alt="checkmark-square-04" width="24" height="24" />
+                            Approve Invoice
+                        </a> 
+                    </li>
+                    <li class="nav-item">
+                        <a th:classappend="${page == 'All-Invoices-List'} ? active : ''" class="nav-link mx-2" th:href="@{/invoices}">
+                            <img th:src="@{/assets/icon/invoices.svg}" alt="invoice-01" width="24" height="24" />
+                            All Invoices List
+                        </a> 
+                    </li>
+                    <li class="nav-item">
+                        <a th:classappend="${page == 'Tax'} ? active : ''" class="nav-link mx-2" th:href="@{/tax}">
+                            <img th:src="@{/assets/icon/tax.svg}" alt="taxes" width="24" height="24" />
+                            Tax Management
+                        </a> 
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" data-bs-toggle="dropdown" th:href="@{#}">
+                            <img th:src="@{/assets/icon/notification.svg}" alt="notification-01"/>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-notification">
+                            <h5 style="text-align: center;">Notifications</h5>
+                            <li>
+                                <li>
+                                    <!-- Notification hari ini -->
+                                    <div class="dropdown-header" th:if="${not #lists.isEmpty(notifications0)}" style="text-align: center;">
+                                        <span style="text-align: center;">Today</span>
+                                    </div>
+                                    <div th:each="notif: ${notifications0}">
+                                        <a th:href="@{/approval/{invoiceNumber}(invoiceNumber=${notif.invoiceNumber.replace('/', '_')}, approvalId=${notif.approvalId})}">
+                                            <div class="notifications-item">
+                                                <div class="text">
+                                                    <p th:text="${notif.content}"></p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+
+                                    <!-- Notification kemarin -->
+                                    <div class="dropdown-header" th:if="${not #lists.isEmpty(notifications1)}" style="text-align: center;">
+                                        <span style="text-align: center;">Yesterday</span>
+                                    </div>
+                                    <div th:each="notif: ${notifications1}">
+                                        <a th:href="@{/approval/{invoiceNumber}(invoiceNumber=${notif.invoiceNumber.replace('/', '_')}, approvalId=${notif.approvalId})}">
+                                            <div class="notifications-item">
+                                                <div class="text">
+                                                    <p th:text="${notif.content}"></p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+
+                                    <!-- Notification seminggu ke belakang -->
+                                    <div class="dropdown-header" th:if="${not #lists.isEmpty(notifications7)}" style="text-align: center;">
+                                        <span style="text-align: center;">The last 7 days</span>
+                                    </div>
+                                    <div th:each="notif: ${notifications7}">
+                                        <a th:href="@{/approval/{invoiceNumber}(invoiceNumber=${notif.invoiceNumber.replace('/', '_')}, approvalId=${notif.approvalId})}">
+                                            <div class="notifications-item">
+                                                <div class="text">
+                                                    <p th:text="${notif.content}"></p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+
+                                    <!-- Notification sebulan ke belakang -->
+                                    <div class="dropdown-header" th:if="${not #lists.isEmpty(notifications30)}" style="text-align: center;">
+                                        <span style="text-align: center;">The last 30 days</span>
+                                    </div>
+                                    <div th:each="notif: ${notifications30}">
+                                        <a th:href="@{/approval/{invoiceNumber}(invoiceNumber=${notif.invoiceNumber.replace('/', '_')}, approvalId=${notif.approvalId})}">
+                                            <div class="notifications-item">
+                                                <div class="text">
+                                                    <p th:text="${notif.content}"></p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </li>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link mx-2 dropdown-toggle nav-profile" href="#" id="navbarDropdownMenuLink" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user" style="margin-right:5px"></i>
+                            <span th:text="${email}"></span>
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <li><a class="dropdown-item" th:href="@{/profile-page}">Profile</a></li>
+                            <li>
+                                <form th:action="@{/logout}" method="post" class="logout-form">
+                                  <button type="submit" class="dropdown-item" style="border: none; background: none; cursor: pointer;">Logout</button>
+                                </form>
+                              </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <nav th:fragment="navbar-finance-exc" th:if="${role == 'Finance Manager' or role == 'Finance Director'}" class="navbar navbar-expand-lg navbar-bg  p-3">
+        <div class="container-fluid theme-color">
+            <a class="navbar-brand" th:href="@{/home}">
+                <img th:src="@{/assets/nav-logo.png}" alt="INVOICESYNC Logo" style="width: 240px;" />
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+                aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class=" collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav ms-auto ">
+                    <li class="nav-item">
+                        <a th:classappend="${page == 'Home'} ? active : ''" class="nav-link mx-2" th:href="@{/home}">
+                            <img th:src="@{/assets/icon/home.svg}" alt="dashboard-square-01" width="24" height="24" />
+                            Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <!-- TODO : Add th:href -->
+                        <a th:classappend="${page == 'Approve-Invoice'} ? active : ''" class="nav-link mx-2" th:href="@{/approval}">
+                            <img th:src="@{/assets/icon/approval.svg}" alt="checkmark-square-04" width="24" height="24" />
+                            Approve Invoice
+                        </a> 
+                    </li>
+                    <li class="nav-item">
+                        <a th:classappend="${page == 'All-Invoices-List'} ? active : ''" class="nav-link mx-2" th:href="@{/invoices}">
+                            <img th:src="@{/assets/icon/invoices.svg}" alt="invoice-01" width="24" height="24" />
+                            All Invoices List
+                        </a>  
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link" data-bs-toggle="dropdown" th:href="@{#}">
+                            <img th:src="@{/assets/icon/notification.svg}" alt="notification-01"/>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-notification">
+                            <h5 style="text-align: center;">Notifications</h5>
+                            <li>
+                                <li>
+                                    <!-- Notification hari ini -->
+                                    <div class="dropdown-header" th:if="${not #lists.isEmpty(notifications0)}" style="text-align: center;">
+                                        <span style="text-align: center;">Today</span>
+                                    </div>
+                                    <div th:each="notif: ${notifications0}">
+                                        <a th:href="@{/approval/{invoiceNumber}(invoiceNumber=${notif.invoiceNumber.replace('/', '_')}, approvalId=${notif.approvalId})}">
+                                            <div class="notifications-item">
+                                                <div class="text">
+                                                    <p th:text="${notif.content}"></p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+
+                                    <!-- Notification kemarin -->
+                                    <div class="dropdown-header" th:if="${not #lists.isEmpty(notifications1)}" style="text-align: center;">
+                                        <span style="text-align: center;">Yesterday</span>
+                                    </div>
+                                    <div th:each="notif: ${notifications1}">
+                                        <a th:href="@{/approval/{invoiceNumber}(invoiceNumber=${notif.invoiceNumber.replace('/', '_')}, approvalId=${notif.approvalId})}">
+                                            <div class="notifications-item">
+                                                <div class="text">
+                                                    <p th:text="${notif.content}"></p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+
+                                    <!-- Notification seminggu ke belakang -->
+                                    <div class="dropdown-header" th:if="${not #lists.isEmpty(notifications7)}" style="text-align: center;">
+                                        <span style="text-align: center;">The last 7 days</span>
+                                    </div>
+                                    <div th:each="notif: ${notifications7}">
+                                        <a th:href="@{/approval/{invoiceNumber}(invoiceNumber=${notif.invoiceNumber.replace('/', '_')}, approvalId=${notif.approvalId})}">
+                                            <div class="notifications-item">
+                                                <div class="text">
+                                                    <p th:text="${notif.content}"></p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+
+                                    <!-- Notification sebulan ke belakang -->
+                                    <div class="dropdown-header" th:if="${not #lists.isEmpty(notifications30)}" style="text-align: center;">
+                                        <span style="text-align: center;">The last 30 days</span>
+                                    </div>
+                                    <div th:each="notif: ${notifications30}">
+                                        <a th:href="@{/approval/{invoiceNumber}(invoiceNumber=${notif.invoiceNumber.replace('/', '_')}, approvalId=${notif.approvalId})}">
+                                            <div class="notifications-item">
+                                                <div class="text">
+                                                    <p th:text="${notif.content}"></p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </li>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link mx-2 dropdown-toggle nav-profile" href="#" id="navbarDropdownMenuLink" role="button"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user" style="margin-right:5px"></i>
+                        <span th:text="${email}"></span>
+                    </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                            <li><a class="dropdown-item" th:href="@{/profile-page}">Profile</a></li>
+                            <li>
+                                <form th:action="@{/logout}" method="post" class="logout-form">
+                                  <button type="submit" class="dropdown-item" style="border: none; background: none; cursor: pointer;">Logout</button>
+                                </form>
+                              </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</body>
+
+</html>

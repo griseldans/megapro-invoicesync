@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+    <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+    <title>Employees | InvoiceSync</title>    
+</head>
+
+<body>
+    <nav th:replace="~{fragments/navbar-admin :: navbar-admin(page = 'Employee Management')}"></nav>
+    <div class="container">
+        <div class="card-title">
+            <h2>Employee Account</h2>
+        </div>
+        <div class="text-center">
+            <a href="/create-account" class="btn btn-primary">Register New Account</a>
+        </div>
+        <div class="card-borderless mt-4" style="display: inline;">
+            <div class="grid-container">
+                <div th:each="employee: ${listEmployee}" class="card-employee">
+                    <img th:src="${employee.base64Photo}" alt="Employee Photo" class="rounded-circle">
+                    <div class="card-body">
+                        <p th:text="${employee.email}" class="card-text text-violet"></p>
+                        <p th:text="${employee.role.role}" class="card-text text-muted"></p>
+                        <p th:text="${employee.city}" class="card-text text-muted"></p>
+                        <div class="btn-container">
+                            <a type="button" class="btn btn-danger" href="#" th:attr="onclick=|prepareDeleteEmployeeModal('${employee.userId}')|"
+                            >Delete</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Delete</h5>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this employee?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <a id="deleteEmployeeLink" href="#" class="btn btn-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+    </div> 
+    <script th:inline="javascript">
+        function prepareDeleteEmployeeModal(userId) {
+            console.log(userId)
+            var deleteUrl = '/employee/' + userId + '/delete';
+            $('#deleteEmployeeLink').attr('href', deleteUrl);
+            $('#confirmDeleteModal').modal('show');
+            
+        }
+    </script>  
+</body>
+
+</html>

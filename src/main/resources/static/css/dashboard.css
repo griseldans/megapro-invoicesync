@@ -1,0 +1,28 @@
+
+.center-text {
+    text-align: center;
+    margin-top: 100px;
+}
+.header-row {
+    background-color: #3f2685;
+    color: white;
+}
+
+.table-row {
+    background-color: #f9f9f9;
+    font-family: 'Poppins', sans-serif;
+}
+
+.odd-row {
+    background-color: #e0e0e0;
+}
+
+.header-cell {
+    font-weight: bold;
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+}
+
+.table-cell {
+    color: #333; /* Default text color for table cells */
+}

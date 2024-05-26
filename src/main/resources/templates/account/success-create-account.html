@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+    <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+    <title>Create Employee | InvoiceSync</title>
+    <style>
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+          <a class="navbar-brand theme-color" href="#">INVOICESYNC</a>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="fas fa-user" style="margin-right:5px"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownMenuLink">
+                  <li><a class="dropdown-item" href="#">Profile</a></li>
+                  <li><hr class="dropdown-divider"></li>
+                  <!-- Form Logout -->
+                  <li>
+                    <form th:action="@{/logout}" method="post" class="logout-form">
+                      <button type="submit" class="dropdown-item" style="border: none; background: none; cursor: pointer;">Logout</button>
+                    </form>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+    </nav>
+
+    <div class="container">
+      <div class="card m-4 p-4">
+        <div class="card-body">
+          <div class="text-center">
+            <h2 class="text-violet">Employee's account is successfully created</h2>
+          </div>
+          <div class="text-center m-3">
+            <a type="button" class="btn btn-md btn-signin" href="/home">Home</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+
+</html>

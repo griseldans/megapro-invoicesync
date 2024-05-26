@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+  <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+  <style>
+  </style>
+  <title>Home | InvoiceSync</title>
+</head>
+<body>
+<nav th:replace="~{fragments/navbar-admin :: navbar-admin(page='Home')}"></nav>
+<div class="container">
+    <div class="row dashboard-row">
+        <div class="col dashboard-col p-3" style="background-image: linear-gradient(to right,#3f2685  , #856ad4);">
+            <div class="card-title text-left">
+              <h4 class="text-left text-white">Welcome to InvoiceSync, Admin</h4>
+              <p class="text-left text-white">InvoiceSync is a web-based invoice management system made for a consulting firm that facilitates invoice creation, invoice approval, dashboards, and user management. As an admin, you have access to features to create employee accounts, delete employee accounts, and configure approval flows.</p>
+            </div>
+          </div>
+    </div>
+
+</div>
+</body>
+</html>

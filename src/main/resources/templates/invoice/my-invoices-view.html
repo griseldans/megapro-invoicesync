@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoices | InvoiceSync</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <object th:include="~{fragments/common :: js}" th:remove="tag"></object>
+    <object th:include="~{fragments/common :: css}" th:remove="tag"></object>
+</head>
+<body>
+    <nav th:replace="~{fragments/navbar-non-finance :: navbar-non-finance-staff(page='My-Invoice')}"></nav>
+    <div class="container">
+        <div class="card-title">
+            <h2>My Invoice History</h2>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <p>Click on the invoice number to view the details.</p>
+                <form class="row align-items-center" th:action="@{/my-invoices}" method="GET">
+                    <div class="col-auto">
+                        <img th:src="@{/assets/filter-horizontal-stroke-rounded.svg}" alt="filter-horizontal" width="24" height="24" />
+                        <label style="margin-bottom:0px" for="filterDropdown">Filter:</label>
+                    </div>
+                    <div class="col-auto">
+                        <select class="form-control" id="filterDropdown" name="status">
+                            <option th:selected="${status == null or status == ''}"></option>
+                            <option th:selected="${status == 'Waiting for Approver'}" value="Waiting for Approver">Waiting for Approver</option>
+                            <option th:selected="${status == 'Pending Approval'}" value="Pending Approval">Pending Approval</option>
+                            <option th:selected="${status == 'Approved'}" value="Approved">Approved</option>
+                            <option th:selected="${status == 'Rejected'}" value="Rejected">Rejected</option>
+                            <option th:selected="${status == 'Need Revision'}" value="Need Revision">Need Revision</option>
+                            <option th:selected="${status == 'Paid'}" value="Paid">Paid</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary">Apply</button>
+                    </div>
+                </form>
+                <table class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Invoice Number</th>
+                            <th>Client Name</th>
+                            <th>Grand Total</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${#lists.size(invoices) == 0}">
+                            <td colspan="5" class="text-center">You haven't created any invoices yet.</td>
+                        </tr>                   
+                        <tr th:each="invoice, iterStat : ${invoices}" th:if="${invoice.customer != null}">
+                            <td th:text="${iterStat.count}"></td>
+                            <td>
+                                <a th:href="@{/invoice/{invoiceNumber}(invoiceNumber=${invoice.invoiceNumber.replace('/', '_')})}"
+                                    th:text="${invoice.invoiceNumber}">Invoice Link</a>
+                            </td>
+                            <td th:text="${invoice.customer.name}"></td>
+                            <td th:text="${'Rp' + #numbers.formatDecimal(invoice.grandTotal, 0, 'POINT', 2, 'COMMA')}"></td>
+                            <td th:with="status=${invoice.status}" th:include="~{fragments/invoice-status :: invoice-status-show}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
